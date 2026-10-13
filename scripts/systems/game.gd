@@ -124,6 +124,9 @@ func _snap() -> void:
 		"ending": get_tree().change_scene_to_file(ENDING)
 		"parent": open_parent_menu()
 	await get_tree().create_timer(2.0).timeout
+	if args.has("pause"):
+		get_tree().call_group("pausable", "request_pause")
+		await get_tree().create_timer(0.5).timeout
 	get_viewport().get_texture().get_image().save_png("res://docs/shots/%s.png" % args["snap"])
 	get_tree().quit()
 

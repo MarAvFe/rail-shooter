@@ -18,7 +18,9 @@ SHAPES = {
     "play": lambda d: d.polygon([(170, 110), (410, 256), (170, 402)], fill="white"),
     "resume": lambda d: d.polygon([(170, 110), (410, 256), (170, 402)], fill="white"),
     "pause": lambda d: [d.rounded_rectangle(b, 30, fill="white") for b in ((140, 110, 230, 402), (282, 110, 372, 402))],
-    "book": lambda d: [d.rounded_rectangle((90, 120, 250, 400), 24, fill="white"), d.rounded_rectangle((262, 120, 422, 400), 24, fill="white")],
+    "book": lambda d: [d.polygon([(60, 150), (246, 190), (246, 420), (60, 380)], fill="white"),  # open book: slanted pages
+                       d.polygon([(452, 150), (266, 190), (266, 420), (452, 380)], fill="white"),
+                       d.polygon([(250, 175), (262, 175), (262, 430), (250, 430)], fill="white")],
     "star": lambda d: d.polygon(star(256, 270, 200, 85), fill="white"),
     "restart": lambda d: [d.arc((110, 110, 402, 402), 40, 330, fill="white", width=70),
                           d.polygon([(360, 70), (420, 210), (280, 190)], fill="white")],

@@ -81,6 +81,13 @@ func _ready() -> void:
 	total_orbs = orbs.size() + 2 * enemies.size()  # enemies drop 1-3
 	AudioBus.music(str(L["music"]))
 	ship.bumped.connect(_on_bump)
+	Bindings.honked.connect(_on_honk)
+	var hum := AudioStreamPlayer.new()  # engine bed, far under the music
+	hum.stream = AudioBus.stream("loop_engine", true)
+	hum.bus = "SFX"
+	hum.volume_db = -4.0
+	add_child(hum)
+	hum.play()
 	speed = base_speed * 0.5
 	_last_us = Time.get_ticks_usec()
 	if Game.args.has("bot"):
@@ -601,6 +608,13 @@ func to_checkpoint() -> void:
 			e.scale = Vector3.ONE * 0.01
 	_place_ship()
 	_cam_follow(1.0, true)
+
+
+func _on_honk() -> void:
+	if get_tree().paused or finished:
+		return
+	AudioBus.play("sfx_honk", randf_range(0.95, 1.08))
+	ship.happy()
 
 
 func _on_bump() -> void:
