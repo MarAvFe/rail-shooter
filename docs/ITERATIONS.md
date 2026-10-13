@@ -11,3 +11,4 @@
 - R10 fixes: stacked pause screens after closing the parent menu (one pause layer max, parent menu owns input while open, regression test); speed selector up to 150%.
 - R11: critters/Guardian were modelled facing -Z (travel direction) so the chase camera saw their backs -> turned 180° toward the player.
 - R12: celebration camera swings round to a front three-quarter view of the ship (eased, 5 s, no roll), then drifts; fire-hint glint hidden.
+- R13: defeated Guardian shrinks to a small warm lamp and floats up into the Gate; the Gate lights (it only repainted children before, so nothing visibly changed).

@@ -20,6 +20,7 @@ var model: Node3D
 var _hit := 0.0
 var _die := 0.0
 var _mat: StandardMaterial3D
+var _sleep_t := 0.0
 
 
 func setup(d: Dictionary, scene: PackedScene) -> void:
@@ -61,7 +62,12 @@ func update(dt: float) -> void:
 		"buzzer":
 			offset = base + Vector2(sin(t * 0.5) * 7.0, sin(t * 1.0) * 3.0)
 		"guardian":
-			offset = base + Vector2(sin(t * 0.2) * 6.0, sin(t * 0.33) * 3.0)
+			if state == "asleep":  # drifts up and in, to hang in the Gate as its lamp
+				_sleep_t += dt
+				var k := ease(clampf(_sleep_t / 2.5, 0.0, 1.0), -2.0)
+				offset = base + Vector2(sin(t * 0.2) * 6.0, sin(t * 0.33) * 3.0).lerp(Vector2.ZERO, k) + Vector2(0.0, 26.0 * k)
+			else:
+				offset = base + Vector2(sin(t * 0.2) * 6.0, sin(t * 0.33) * 3.0)
 		_:
 			offset = base
 	_hit = maxf(_hit - dt, 0.0)
@@ -75,12 +81,15 @@ func update(dt: float) -> void:
 			visible = false
 			popped.emit(self)
 			return
+	if kind == "guardian" and state == "asleep":  # shrink into a small lamp
+		sc = lerpf(1.0, 0.16, ease(clampf(_sleep_t / 2.5, 0.0, 1.0), -2.0))
 	scale = Vector3.ONE * maxf(sc, 0.01)
 	model.rotation.y = PI + sin(t * 0.7) * 0.4  # faces are modelled on -Z (travel direction): turn them to the player
 	if kind == "guardian":
 		var lit := 1.0 - float(hp) / float(HP[kind])
 		_mat.albedo_color = Color(0.62, 0.62, 0.72).lerp(Color.WHITE, lit)
-		if state == "asleep":  # dozing lamp: slow breathing, no sway
+		if state == "asleep":  # dozing lamp: slow breathing, no sway, warming to a glow as it shrinks
+			_mat.albedo_color = Color.WHITE.lerp(Color(2.2, 1.9, 1.4), clampf(_sleep_t / 2.5, 0.0, 1.0))
 			model.rotation.y = PI
 			model.position.y = sin(Game.t * PI * 0.5) * 0.6
 		elif state == "live" and age > 45.0:  # never blocks the ending: dozes off on its own

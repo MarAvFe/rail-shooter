@@ -107,6 +107,8 @@ func _ready() -> void:
 		_shot_tour.call_deferred()
 	if Game.args.has("celebrate"):
 		_celebrate_shots.call_deferred()
+	if Game.args.has("gtest"):
+		_guardian_shots.call_deferred()
 
 
 # ---------------- build ----------------
@@ -657,10 +659,17 @@ func _light_gate(e: Enemy) -> void:
 	AudioBus.play("sfx_jingle")
 	sparkle.global_position = e.global_position
 	sparkle.restart()
-	Game.paint(e.model, true)
 	var gn := _world_root.find_child("gate_0", true, false)
-	if gn:
-		Game.paint(gn, true)
+	if gn:  # lit: warm, brighter than white (unshaded vertex colour x albedo > 1), fades in
+		var lit := Game.vc_mat.duplicate() as StandardMaterial3D
+		lit.disable_fog = true
+		lit.albedo_color = Color.WHITE
+		var meshes := gn.find_children("*", "MeshInstance3D", true, false)
+		if gn is MeshInstance3D:  # find_children skips the node itself
+			meshes.append(gn)
+		for n in meshes:
+			(n as MeshInstance3D).material_override = lit
+		create_tween().tween_property(lit, "albedo_color", Color(1.9, 1.7, 1.35), 2.0)
 	enemy_popped.emit()
 
 
@@ -873,4 +882,22 @@ func _celebrate_shots() -> void:
 			await get_tree().process_frame
 		await get_tree().process_frame
 		get_viewport().get_texture().get_image().save_png("res://docs/shots/celebrate_%d.png" % i)
+	get_tree().quit()
+
+
+## --gtest (level 6): defeat the Guardian and capture the lamp transformation (docs/shots/guardian_N.png).
+func _guardian_shots() -> void:
+	s = float(L["guardian_hold"]) - 40.0
+	speed = 0.0
+	_place_ship()
+	_cam_follow(1.0, true)
+	for i in 90:
+		await get_tree().process_frame
+	guardian.hp = 1
+	guardian.hit()
+	for i in 4:
+		for k in 45:
+			await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("res://docs/shots/guardian_%d.png" % i)
+	print("GTEST gate_lit=", gate_lit, " state=", guardian.state, " scale=", guardian.scale.x)
 	get_tree().quit()
