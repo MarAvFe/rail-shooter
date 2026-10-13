@@ -23,5 +23,5 @@ for f in levels/level_*.json; do
     timeout 300 $GODOT --path . -- --level=$n --shots 2>&1 | grep -q SHOTS && row "level $n screenshots" PASS "docs/shots/level_${n}_*.png" || row "level $n screenshots" FAIL "(needs a display)"
   fi
 done
-echo; echo "== Sky Skimmers tests =="; printf '%s\n' "${ROWS[@]}"; echo
+echo; echo "== rail-shooter tests =="; printf '%s\n' "${ROWS[@]}"; echo
 [ $FAIL = 0 ] && echo "ALL PASS" || echo "SOME FAILED"; exit $FAIL

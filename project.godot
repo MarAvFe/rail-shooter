@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 
-config/name="Sky Skimmers"
+config/name="rail-shooter"
 run/main_scene="res://scenes/title.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 boot_splash/bg_color=Color(0.99, 0.95, 0.9, 1)

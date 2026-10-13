@@ -39,3 +39,7 @@ Format: reading taken — reason — how to change.
 - **Props** are merged per 400 m chunk (few draw calls). Each prop asserts it sits fully outside the corridor and is placed on the sampled terrain height.
 - **Pause:** at most one pause screen; the parent menu owns input while open and returns to the existing pause screen. Covered by `--test`.
 - **Tests pin `--speed=1.0`** so a family member's speed setting doesn't change the bot results.
+
+## Rename (user, 2026-10-13)
+- The game is now called **rail-shooter** (was the working title "Sky Skimmers"): window title, exe/binary names, README, credits. `PROMPT.md` keeps the original bootstrap prompt verbatim, so it still says "Sky Skimmers".
+- Godot derives the user-data folder from `config/name`, so saves and bindings now live under `rail-shooter/`. Progress from the old "Sky Skimmers" folder is not migrated (only dev/test saves existed).

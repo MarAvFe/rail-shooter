@@ -1,6 +1,6 @@
 # Playtest guide (for the parent)
 
-**Setup:** start `SkySkimmers.exe`. If you're using the PS2 pad, first hold F1 for 3 s → *Set up a controller…*. Then hand over the controller and say nothing. Watch the first two minutes without helping.
+**Setup:** start `rail-shooter.exe`. If you're using the PS2 pad, first hold F1 for 3 s → *Set up a controller…*. Then hand over the controller and say nothing. Watch the first two minutes without helping.
 
 ## Watch for
 1. **First 10 seconds:** does he discover steering by himself? (The rail is empty for 5 s, then a line of orbs curves left to right.)

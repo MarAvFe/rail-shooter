@@ -1,4 +1,4 @@
-# Sky Skimmers — Design
+# rail-shooter — Design
 
 ## 1. Principles (from general knowledge; no web pass yet)
 - Chase cam ~12 m behind / 4 m above, steady horizon; the ship banks, the camera never rolls.
