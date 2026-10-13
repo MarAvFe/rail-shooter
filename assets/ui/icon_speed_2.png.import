@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cax7q6j6o5mqf"
-path="res://.godot/imported/ship_hover_sled.png-6d51789905c44149f20af7b335de2ea0.ctex"
+uid="uid://cbu14p6w88cbi"
+path="res://.godot/imported/icon_speed_2.png-f9bd423d48eb03ffc03ced0ea897d2c0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/review/ship_hover_sled.png"
-dest_files=["res://.godot/imported/ship_hover_sled.png-6d51789905c44149f20af7b335de2ea0.ctex"]
+source_file="res://assets/ui/icon_speed_2.png"
+dest_files=["res://.godot/imported/icon_speed_2.png-f9bd423d48eb03ffc03ced0ea897d2c0.ctex"]
 
 [params]
 

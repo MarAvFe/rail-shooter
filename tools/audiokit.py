@@ -88,8 +88,11 @@ def sfx():
             x = reverb(x, rv, 0.6)
         out[name] = save(name, fade_tail(x), peak)
 
-    n = int(0.16 * SR)
-    fx("sfx_shot", tone(np.linspace(420, 560, n), 0.16, a=0.012, d=0.05, s=0.35, r=0.08), -22, lp=2000)
+    # zap: fast downward sweep with a little wobble, soft edges
+    n = int(0.15 * SR)
+    t = np.arange(n) / SR
+    f = 260 + 1300 * np.exp(-t * 28) + 40 * np.sin(2 * np.pi * 55 * t)
+    fx("sfx_shot", tone(f, 0.15, a=0.004, d=0.04, s=0.5, r=0.08), -16, lp=3200)
     m = int(0.45 * SR)
     puff = 0.6 * soft_noise(0.45, 700, 1) * env(m, 0.02, 0.12, 0.35, 0.3) + tone(np.linspace(330, 190, m), 0.45, a=0.02, r=0.35)
     fx("sfx_puff", puff, -16, rv=0.2, lp=1800)
@@ -108,13 +111,17 @@ def sfx():
     jing = np.concatenate([tone(note(72 + p), 0.24, a=0.015, d=0.08, s=0.5, r=0.12) for p in [0, 4, 7, 9]]
                           + [tone(note(84), 0.9, a=0.015, d=0.2, s=0.4, r=0.6)])
     fx("sfx_jingle", jing, -14, rv=0.3, lp=4500)
-    # engine bed: soft wind, 4 s, crossfaded end->start so it loops seamlessly
-    L, X = 4 * SR, SR // 2
-    w = soft_noise(4.5, 350, 9) * (0.8 + 0.2 * np.sin(2 * np.pi * 0.25 * np.arange(int(4.5 * SR)) / SR))
-    loop = w[:L].copy()
-    fade = np.linspace(0, 1, X)
-    loop[:X] = w[:X] * fade + w[L:L + X] * (1 - fade)
-    out["loop_engine"] = save("loop_engine", loop, -32)
+    # engine: warm hum (110 Hz family, audible on small speakers) + a breath of filtered air.
+    # 4 s loop; every partial completes whole cycles in 4 s, and the noise is crossfaded -> seamless.
+    L = 4 * SR
+    t = np.arange(L) / SR
+    hum = (np.sin(2 * np.pi * 110 * t) + 0.5 * np.sin(2 * np.pi * 220.25 * t) + 0.25 * np.sin(2 * np.pi * 330 * t)
+           + 0.12 * np.sin(2 * np.pi * 440.5 * t)) * (0.85 + 0.15 * np.sin(2 * np.pi * 0.5 * t))
+    X = SR // 2
+    w = soft_noise(4.5, 600, 9)
+    air = w[:L].copy()
+    air[:X] = w[:X] * np.linspace(0, 1, X) + w[L:L + X] * np.linspace(1, 0, X)
+    out["loop_engine"] = save("loop_engine", hum + 0.35 * air, -14)  # no filter on hum: a filter start-up transient would click at the seam
     return out
 
 

@@ -62,3 +62,9 @@ func _process(dt: float) -> void:
 		var n: Control = items[i]["node"]
 		var k := 1.0 + (0.18 + 0.06 * sin(Game.t * PI * 2.0)) * float(i == sel)
 		n.scale = n.scale.lerp(Vector2(k, k), 1.0 - exp(-12.0 * dt))
+
+
+func set_icon(id: String, icon: String) -> void:
+	for it in items:
+		if it["id"] == id:
+			(it["node"] as TextureButton).texture_normal = load("res://assets/ui/icon_%s.png" % icon)

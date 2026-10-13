@@ -14,6 +14,14 @@ def star(cx, cy, r1, r2, n=5):
     return [(cx + (r1 if i % 2 == 0 else r2) * math.sin(math.pi * i / n), cy - (r1 if i % 2 == 0 else r2) * math.cos(math.pi * i / n)) for i in range(2 * n)]
 
 
+def _chevrons(d, n):
+    """n forward chevrons = speed; dim outlines for the missing ones so the scale is visible."""
+    for i in range(3):
+        x = 70 + i * 120
+        pts = [(x, 120), (x + 80, 120), (x + 190, 256), (x + 80, 392), (x, 392), (x + 110, 256)]
+        d.polygon(pts, fill="white" if i < n else (255, 255, 255, 70))
+
+
 SHAPES = {
     "play": lambda d: d.polygon([(170, 110), (410, 256), (170, 402)], fill="white"),
     "resume": lambda d: d.polygon([(170, 110), (410, 256), (170, 402)], fill="white"),
@@ -32,6 +40,9 @@ SHAPES = {
     "cone": lambda d: [d.polygon([(256, 70), (360, 400), (152, 400)], fill="white"), d.rounded_rectangle((90, 390, 422, 450), 20, fill="white"),
                        d.polygon([(220, 185), (292, 185), (310, 245), (202, 245)], fill=(0, 0, 0, 0)),
                        d.polygon([(186, 295), (326, 295), (344, 350), (168, 350)], fill=(0, 0, 0, 0))],
+    "speed_1": lambda d: _chevrons(d, 1),
+    "speed_2": lambda d: _chevrons(d, 2),
+    "speed_3": lambda d: _chevrons(d, 3),
     "ship": lambda d: d.polygon([(256, 90), (450, 380), (300, 340), (256, 400), (212, 340), (62, 380)], fill="white"),
 }
 

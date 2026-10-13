@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fdglb2p3kcfw"
-path="res://.godot/imported/ship_air_kite.png-f87c00384fdc06f1026acc36f00eeccf.ctex"
+uid="uid://dtj83hp8mmhdw"
+path="res://.godot/imported/icon_speed_3.png-5a73c916cfe063dc1c918be33a02f90b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/review/ship_air_kite.png"
-dest_files=["res://.godot/imported/ship_air_kite.png-f87c00384fdc06f1026acc36f00eeccf.ctex"]
+source_file="res://assets/ui/icon_speed_3.png"
+dest_files=["res://.godot/imported/icon_speed_3.png-5a73c916cfe063dc1c918be33a02f90b.ctex"]
 
 [params]
 

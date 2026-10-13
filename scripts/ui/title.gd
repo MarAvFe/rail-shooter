@@ -35,8 +35,10 @@ func _ready() -> void:
 	var cl := CanvasLayer.new()
 	add_child(cl)
 	_menu = IconMenu.new()
+	_menu.icon_size = 96.0
 	_menu.add_item("play", "play", Color("#8ff0e0"))
 	_menu.add_item("book", "book", Color("#f3b6d8"))
+	_menu.add_item("gear", "gear", Color(0.75, 0.75, 0.85))
 	cl.add_child(_menu)
 	_menu.chosen.connect(_on_choice)
 	AudioBus.music("music_title")
@@ -49,7 +51,12 @@ func _on_honk() -> void:
 		create_tween().tween_property(n, "position:y", n.position.y + 0.8, 0.15).set_trans(Tween.TRANS_SINE)
 
 
+var _gear_hold := 0.0
+
+
 func _on_choice(id: String) -> void:
+	if id == "gear":
+		return  # parent settings need a 1.5 s hold (see _process), so a tap does nothing
 	if id == "play":
 		var next := 1
 		for i in range(1, 7):
@@ -63,7 +70,16 @@ func _on_choice(id: String) -> void:
 
 func _process(dt: float) -> void:
 	var vs := get_viewport().get_visible_rect().size
-	_menu.position = Vector2((vs.x - _menu.size.x) / 2.0, vs.y * 0.68)
+	_menu.position = Vector2((vs.x - _menu.size.x) / 2.0, vs.y * 0.62)
+	# gear: hold fire/enter (or the mouse) 1.5 s to open the parent menu; it turns while held
+	var gear: Control = _menu.items[2]["node"]
+	var on_gear := _menu.sel == 2
+	var held := on_gear and (Input.is_action_pressed("menu_accept") or Input.is_action_pressed("fire") or (gear as BaseButton).button_pressed)
+	_gear_hold = _gear_hold + dt if held else 0.0
+	gear.rotation = _gear_hold * 3.0
+	if _gear_hold >= 1.5:
+		_gear_hold = -INF
+		Game.open_parent_menu()
 	for i in _ships.size():
 		var n := _ships[i]
 		n.position.y = lerpf(n.position.y, 0.5 + sin(Game.t * PI + i * 1.3) * 0.35, 1.0 - exp(-4.0 * dt))

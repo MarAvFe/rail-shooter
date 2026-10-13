@@ -119,8 +119,8 @@
  ],
  "audio": {
   "sfx_shot": {
-   "peak": -22.0,
-   "rms": -31.8,
+   "peak": -16.0,
+   "rms": -24.8,
    "seam": 0.0
   },
   "sfx_puff": {
@@ -199,9 +199,9 @@
    "seam": 0.0
   },
   "loop_engine": {
-   "peak": -32.0,
-   "rms": -44.0,
-   "seam": 0.0001
+   "peak": -14.0,
+   "rms": -21.3,
+   "seam": 0.008
   },
   "music_title": {
    "peak": -12.0,
@@ -257,6 +257,9 @@
   "orb",
   "speaker",
   "cone",
+  "speed_1",
+  "speed_2",
+  "speed_3",
   "ship"
  ],
  "fails": []

@@ -54,6 +54,7 @@ var sparkle: CPUParticles3D
 var bot: Node = null
 var _cam_look := Vector3.ZERO
 var touring := false
+var engine: AudioStreamPlayer
 var _sky_mat: ProceduralSkyMaterial
 var _world_root: Node
 var guardian: Enemy = null
@@ -86,12 +87,12 @@ func _ready() -> void:
 	AudioBus.music(str(L["music"]))
 	ship.bumped.connect(_on_bump)
 	Bindings.honked.connect(_on_honk)
-	var hum := AudioStreamPlayer.new()  # engine bed, far under the music
-	hum.stream = AudioBus.stream("loop_engine", true)
-	hum.bus = "SFX"
-	hum.volume_db = 0.0
-	add_child(hum)
-	hum.play()
+	engine = AudioStreamPlayer.new()  # engine hum: follows rail speed, sits under the music
+	engine.stream = AudioBus.stream("loop_engine", true)
+	engine.bus = "SFX"
+	engine.volume_db = -6.0
+	add_child(engine)
+	engine.play()
 	speed = base_speed * 0.5
 	_last_us = Time.get_ticks_usec()
 	if Game.args.has("bot"):
@@ -430,6 +431,10 @@ func _process(dt: float) -> void:
 			checkpoint = maxf(checkpoint, c)
 	_place_ship()
 	_cam_follow(dt)
+	if engine:
+		var k := clampf(speed / maxf(base_speed, 1.0), 0.0, 1.3)
+		engine.pitch_scale = (1.25 if mode == "hover" else 1.0) * (0.8 + 0.25 * k) + ship.inp.length() * 0.05
+		engine.volume_db = lerpf(-14.0, -3.0, clampf(k, 0.0, 1.0))
 	_update_enemies(dt)
 	_update_combat(dt)
 	_update_orbs(dt)
@@ -703,17 +708,37 @@ func request_pause() -> void:
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	pause_layer.add_child(dim)
 	var m := IconMenu.new()
+	m.icon_size = 100.0
 	m.set_anchors_preset(Control.PRESET_CENTER)
 	m.add_item("resume", "play", Color("#8ff0e0"))
 	m.add_item("restart", "restart", Color("#ffd59e"))
 	m.add_item("home", "book", Color("#f3b6d8"))
+	m.add_item("speed", "speed_%d" % (_speed_idx() + 1), Color("#b9e3a0"))
 	pause_layer.add_child(m)
 	m.position -= Vector2(m.get_combined_minimum_size().x / 2, 64)
 	m.chosen.connect(_on_pause_choice)
 	add_child(pause_layer)
 
 
+const SPEEDS := [0.6, 0.8, 1.0]
+
+
+func _speed_idx() -> int:
+	var cur := float(Save.setting("speed"))
+	var best := 0
+	for i in SPEEDS.size():
+		if absf(SPEEDS[i] - cur) < absf(SPEEDS[best] - cur):
+			best = i
+	return best
+
+
 func _on_pause_choice(id: String) -> void:
+	if id == "speed":  # wordless speed: 1, 2 or 3 chevrons; stays in the pause menu
+		var i := (_speed_idx() + 1) % SPEEDS.size()
+		Save.set_setting("speed", SPEEDS[i])
+		(pause_layer.get_child(1) as IconMenu).set_icon("speed", "speed_%d" % (i + 1))
+		AudioBus.play("sfx_honk", 0.9 + 0.1 * i)
+		return
 	pause_layer.queue_free()
 	get_tree().paused = false
 	match id:

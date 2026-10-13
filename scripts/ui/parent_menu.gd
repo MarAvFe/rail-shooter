@@ -74,7 +74,7 @@ func _build() -> void:
 	_label(t("title"), 22)
 	_first = _slider("music", 0.0, 1.0, 0.05)
 	_slider("sfx", 0.0, 1.0, 0.05)
-	_options("speed", [0.6, 0.8, 1.0])
+	_options("speed", [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.3])
 	_check("retro")
 	_check("fullscreen")
 	_check("invert_y")
@@ -128,8 +128,13 @@ func _slider(key: String, lo: float, hi: float, step: float) -> Control:
 func _options(key: String, vals: Array) -> void:
 	var o := OptionButton.new()
 	for v: float in vals:
-		o.add_item("%d%%" % int(v * 100))
-	o.selected = maxi(vals.find(float(Save.setting(key))), 0)
+		o.add_item("%d%%" % roundi(v * 100))
+	var cur := float(Save.setting(key))
+	var best := 0
+	for i in vals.size():  # nearest preset, so older saves still show sensibly
+		if absf(float(vals[i]) - cur) < absf(float(vals[best]) - cur):
+			best = i
+	o.selected = best
 	o.item_selected.connect(func(i: int) -> void: Save.set_setting(key, vals[i]))
 	_row(key).add_child(o)
 
