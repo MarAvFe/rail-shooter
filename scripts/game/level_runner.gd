@@ -54,6 +54,7 @@ var sparkle: CPUParticles3D
 var bot: Node = null
 var _cam_look := Vector3.ZERO
 var touring := false
+var _celebrate_t := 0.0
 var birds: Array[Dictionary] = []  # {node, centre, r, phase}
 var _resume_t := -10.0
 var engine: AudioStreamPlayer
@@ -104,6 +105,8 @@ func _ready() -> void:
 		add_child(bot)
 	if Game.args.has("shots"):
 		_shot_tour.call_deferred()
+	if Game.args.has("celebrate"):
+		_celebrate_shots.call_deferred()
 
 
 # ---------------- build ----------------
@@ -355,7 +358,7 @@ func _process(dt: float) -> void:
 		_update_enemies(dt)
 		return
 	if finished:
-		_cam_follow(dt)
+		_celebrate_cam(dt)
 		return
 	_update_assist(dt)
 	var raw := Input.get_vector("steer_left", "steer_right", "steer_down", "steer_up")
@@ -491,6 +494,19 @@ func _cam_follow(dt: float, snap := false) -> void:
 	var kr := 1.0 if snap else 1.0 - exp(-dt / 0.35)
 	cam.global_position = cam.global_position.lerp(want, kp)
 	_cam_look = _cam_look.lerp(look, kr)
+	cam.look_at(_cam_look, UP)
+
+
+## Celebration: the camera glides round the ship to a front three-quarter view (~40° off the nose), then drifts on slowly.
+## Eased, no roll, low angular speed (~30°/s at most) so it stays comfortable.
+func _celebrate_cam(dt: float) -> void:
+	_celebrate_t += dt
+	var k := clampf(_celebrate_t / 5.0, 0.0, 1.0)
+	var angle := deg_to_rad(135.0) * (k * k * (3.0 - 2.0 * k)) + maxf(_celebrate_t - 5.0, 0.0) * deg_to_rad(5.0)
+	var base := basis_at(s).z * 12.0 + UP * (4.5 - 1.5 * k)  # starts behind the ship, ends a little lower and closer
+	var want := ship.global_position + Basis(UP, angle) * base
+	cam.global_position = cam.global_position.lerp(want, 1.0 - exp(-dt / 0.08))
+	_cam_look = _cam_look.lerp(ship.global_position + UP * 0.6, 1.0 - exp(-dt / 0.2))
 	cam.look_at(_cam_look, UP)
 
 
@@ -789,6 +805,7 @@ func parent_menu_closed() -> void:
 
 func _finish() -> void:
 	finished = true
+	glint.visible = false  # the fire hint has no place in the celebration
 	AudioBus.play("sfx_jingle")
 	ship.happy()
 	hud.call("celebrate")
@@ -796,7 +813,7 @@ func _finish() -> void:
 		Game.quit_bot(result())
 		return
 	Save.record_level(Game.level_id, collected, total_orbs)
-	await get_tree().create_timer(4.5).timeout
+	await get_tree().create_timer(7.5).timeout  # long enough for the camera to swing round to the front
 	Game.go(Game.ENDING if Game.level_id == Game.last_level() else Game.BOOK)
 
 
@@ -840,4 +857,20 @@ func _shot_tour() -> void:
 		var img := get_viewport().get_texture().get_image()
 		img.save_png("res://docs/shots/level_%d_%02d.png" % [Game.level_id, i])
 	print("SHOTS ", stops.size())
+	get_tree().quit()
+
+
+## --celebrate: jump to the end of the rail and capture the camera orbit (docs/shots/celebrate_N.png).
+func _celebrate_shots() -> void:
+	s = length - 2.0
+	_place_ship()
+	_cam_follow(1.0, true)
+	finished = true
+	glint.visible = false
+	for i in 5:
+		var until := float(i) * 1.5
+		while _celebrate_t < until:
+			await get_tree().process_frame
+		await get_tree().process_frame
+		get_viewport().get_texture().get_image().save_png("res://docs/shots/celebrate_%d.png" % i)
 	get_tree().quit()
