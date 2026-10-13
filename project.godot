@@ -1,0 +1,32 @@
+; Godot 4.7.2-stable (pinned). Input actions are (re)built at startup by the Bindings autoload.
+config_version=5
+
+[application]
+
+config/name="Sky Skimmers"
+run/main_scene="res://scenes/title.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.99, 0.95, 0.9, 1)
+boot_splash/show_image=false
+run/max_fps=60
+
+[autoload]
+
+Save="*res://scripts/systems/save.gd"
+Bindings="*res://scripts/systems/bindings.gd"
+AudioBus="*res://scripts/systems/audio_bus.gd"
+Game="*res://scripts/systems/game.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0
+anti_aliasing/quality/msaa_3d=0

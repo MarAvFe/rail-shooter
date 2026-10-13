@@ -1,0 +1,193 @@
+{
+ "actors": [
+  {
+   "name": "ship_air_kite",
+   "tris": 336,
+   "col": true,
+   "budget": 1500
+  },
+  {
+   "name": "ship_hover_sled",
+   "tris": 416,
+   "col": true,
+   "budget": 1500
+  },
+  {
+   "name": "enemy_drifter",
+   "tris": 592,
+   "col": true,
+   "budget": 700
+  },
+  {
+   "name": "enemy_pod",
+   "tris": 412,
+   "col": true,
+   "budget": 700
+  },
+  {
+   "name": "enemy_buzzer",
+   "tris": 472,
+   "col": true,
+   "budget": 700
+  },
+  {
+   "name": "enemy_guardian",
+   "tris": 1720,
+   "col": true,
+   "budget": 4000
+  },
+  {
+   "name": "pickup_orb",
+   "tris": 80,
+   "col": true,
+   "budget": 300
+  }
+ ],
+ "levels": [
+  {
+   "level": 1,
+   "tris": 13514,
+   "length": 2344,
+   "orbs": 40,
+   "enemies": 20,
+   "min_radius_m": 571
+  }
+ ],
+ "audio": {
+  "sfx_shot": {
+   "peak": -16.0,
+   "rms": -24.8,
+   "seam": 0.0
+  },
+  "sfx_puff": {
+   "peak": -12.0,
+   "rms": -27.3,
+   "seam": 0.0
+  },
+  "sfx_chime_0": {
+   "peak": -12.0,
+   "rms": -24.2,
+   "seam": 0.0
+  },
+  "sfx_chime_1": {
+   "peak": -12.0,
+   "rms": -24.2,
+   "seam": 0.0
+  },
+  "sfx_chime_2": {
+   "peak": -12.0,
+   "rms": -24.2,
+   "seam": 0.0
+  },
+  "sfx_chime_3": {
+   "peak": -12.0,
+   "rms": -24.1,
+   "seam": 0.0
+  },
+  "sfx_chime_4": {
+   "peak": -12.0,
+   "rms": -24.2,
+   "seam": 0.0
+  },
+  "sfx_chime_5": {
+   "peak": -12.0,
+   "rms": -24.1,
+   "seam": 0.0
+  },
+  "sfx_chime_6": {
+   "peak": -12.0,
+   "rms": -24.1,
+   "seam": 0.0
+  },
+  "sfx_chime_7": {
+   "peak": -12.0,
+   "rms": -24.2,
+   "seam": 0.0
+  },
+  "sfx_boop": {
+   "peak": -14.0,
+   "rms": -22.2,
+   "seam": 0.0
+  },
+  "sfx_honk": {
+   "peak": -12.0,
+   "rms": -22.3,
+   "seam": 0.0
+  },
+  "sfx_gap": {
+   "peak": -12.0,
+   "rms": -25.0,
+   "seam": 0.0
+  },
+  "sfx_blip": {
+   "peak": -16.0,
+   "rms": -25.7,
+   "seam": 0.0001
+  },
+  "sfx_jingle": {
+   "peak": -10.0,
+   "rms": -19.1,
+   "seam": 0.0
+  },
+  "loop_engine": {
+   "peak": -28.0,
+   "rms": -33.6,
+   "seam": 0.0011
+  },
+  "music_title": {
+   "peak": -9.0,
+   "rms": -19.2,
+   "seam": 0.0029
+  },
+  "music_meadow": {
+   "peak": -9.0,
+   "rms": -19.7,
+   "seam": 0.0031
+  },
+  "music_dunes": {
+   "peak": -9.0,
+   "rms": -19.6,
+   "seam": 0.0047
+  },
+  "music_ridge": {
+   "peak": -9.0,
+   "rms": -19.7,
+   "seam": 0.0047
+  },
+  "music_crystal": {
+   "peak": -9.0,
+   "rms": -20.0,
+   "seam": 0.0042
+  },
+  "music_mist": {
+   "peak": -9.0,
+   "rms": -19.6,
+   "seam": 0.0035
+  },
+  "music_gate": {
+   "peak": -9.0,
+   "rms": -19.9,
+   "seam": 0.0034
+  },
+  "music_ending": {
+   "peak": -9.0,
+   "rms": -19.5,
+   "seam": 0.0012
+  }
+ },
+ "icons": [
+  "play",
+  "resume",
+  "pause",
+  "book",
+  "star",
+  "restart",
+  "home",
+  "gear",
+  "lock",
+  "orb",
+  "speaker",
+  "ship"
+ ],
+ "fails": []
+}
