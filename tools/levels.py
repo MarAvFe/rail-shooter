@@ -6,7 +6,7 @@ import trimesh
 from shapely.geometry import Polygon
 from meshkit import Part, bake, write_json, ROOT, lathe, place, export_glb, ico
 from palette import LEVELS, BASE
-from terrain import Rail, terrain_mesh, gap_shape, wall_mesh, debug_map
+from terrain import Rail, terrain_mesh, gap_shape, wall_mesh, debug_map, floor_h, FLOOR_COLS
 
 SHIP_R = 2.0
 MIN_GAP = 10 * SHIP_R
@@ -63,7 +63,40 @@ def level_1():
     }
 
 
-DEFS = {1: level_1}
+# ---------- level 2: Sunrise Dunes (HOVER) ----------
+def level_2():
+    # hover: orb/enemy y is relative to hover height (0 = riding height, +y needs a hop)
+    walls = [{"s": 620, "gap": (-4, -3, 38, 26)}]
+    rocks = [(260, -9, 3.5, 4), (300, 8, 4.5, 5), (420, 0, 3.0, 3), (880, -12, 5.0, 6), (905, 10, 3.5, 4),
+             (1180, 2, 4.0, 4), (1350, -8, 3.0, 3), (1380, 9, 4.5, 5)]
+    orbs = (orb_line(80, 200, 5, 0, -6, 0, 0, bend=4) + orb_line(270, 330, 4, -1, 0, 0, 5)  # hop line over rocks
+            + orb_ring(585, -4, 1, 5, 3) + orb_line(700, 800, 5, -6, 8, 0, 0, bend=-4)
+            + orb_line(1000, 1100, 5, 10, -10, 1, 1) + orb_line(1170, 1200, 3, 2, 2, 2, 6)
+            + orb_line(1420, 1540, 5, 8, -4, 0, 2, bend=3) + orb_line(1600, 1680, 4, -4, 4, 0, 0))
+    enemies = (group("drifter", 380, 3, 2, 3, seed=11) + group("drifter", 760, 5, 0, 4, seed=12)
+               + group("pod", 1050, 1, -14, 0, seed=13) + group("drifter", 1250, 3, -6, 3, seed=14)
+               + group("pod", 1480, 1, 13, 0, seed=15) + group("drifter", 1560, 3, 4, 4, seed=16))
+    return {
+        "id": 2, "name": "sunrise_dunes", "mode": "hover", "speed": 11.0, "seed": 202, "dune": 3.5, "side": (30, 48),
+        "ctrl": [(0, 10, 0), (-40, 10, -250), (10, 12, -560), (80, 10, -850), (60, 8, -1150), (-20, 10, -1450), (-50, 10, -1760)],
+        "profile": [(0, 34, 6), (500, 30, 6), (900, 38, 6), (1300, 30, 6), (1800, 34, 6)],
+        "ceiling": 12.0, "walls": walls, "rocks": rocks, "orbs": orbs, "enemies": enemies,
+        "checkpoints": [0, 500, 1000, 1500], "rest_areas": [[640, 700], [1210, 1330]],
+        "music": "music_dunes", "landmark": {"shape": "peak", "colour": LEVELS[3]["r"][3]},
+        "fog": [110, 420],
+    }
+
+
+DEFS = {1: level_1, 2: level_2}
+
+
+def rock_mesh(r, h, seed, ramp_):
+    rng = np.random.default_rng(seed)
+    m = ico(1, 1)
+    m.vertices *= rng.uniform(0.8, 1.15, (len(m.vertices), 1))  # per-vertex jitter: no two rocks alike
+    m.apply_scale([r, h, r * rng.uniform(0.8, 1.2)])
+    m.apply_translation([0, h * 0.35, 0])
+    return bake([Part(m, ramp_, 2)])
 
 
 def landmark(kind, colour):
@@ -80,7 +113,8 @@ def build_level(d) -> dict:
     rail = Rail(d["ctrl"])
     prof = profile_fn(d["profile"])
     meshes = {}
-    for i, ch in enumerate(terrain_mesh(rail, prof, pal, d["seed"])):
+    dune = d.get("dune", 0.0)
+    for i, ch in enumerate(terrain_mesh(rail, prof, pal, d["seed"], dune, d.get("side", (70, 95)))):
         meshes[f"terrain_{i}"] = ch
     walls_json = []
     for i, w in enumerate(d["walls"]):
@@ -94,6 +128,31 @@ def build_level(d) -> dict:
         safe = gap.buffer(-SHIP_R - 0.3)
         walls_json.append({"s": w["s"], "gap": [list(map(lambda v: round(v, 2), p)) for p in safe.exterior.coords],
                            "centre": [round(safe.centroid.x, 2), round(safe.centroid.y, 2)], "thickness": 10.0})
+    def floor_at(sv, x):
+        _, Fv = prof(np.array([sv]))
+        w = float(prof(np.array([sv]))[0][0])
+        u = np.clip((x / w + 1) * 2, 0, 3.999)
+        j = int(u)
+        a = floor_h(np.array([sv]), FLOOR_COLS[j], Fv, d["seed"], dune)[0]
+        b = floor_h(np.array([sv]), FLOOR_COLS[j + 1], Fv, d["seed"], dune)[0]
+        return float(a + (b - a) * (u - j))
+
+    rocks_json = []
+    for i, (rs, rx, rr, rh) in enumerate(d.get("rocks", [])):
+        t, r = rail.frame(np.array([rs]))
+        fy = floor_at(rs, rx)
+        m = rock_mesh(rr, rh, d["seed"] + 300 + i, pal["r"])
+        ang = np.arctan2(-t[0][0], -t[0][2])
+        m.apply_transform(trimesh.transformations.rotation_matrix(ang, [0, 1, 0]))
+        m.apply_translation(rail.pos(np.array([rs]))[0] + r[0] * rx + np.array([0, fy, 0]))
+        meshes[f"rock_{i}"] = m
+        rocks_json.append({"s": rs, "x": rx, "r": rr, "top": round(fy + rh * 1.2, 2)})
+    if d["mode"] == "hover":  # content heights are relative to riding height (floor + 3 m)
+        for o in d["orbs"]:
+            o["y"] = round(floor_at(o["s"], o["x"]) + 3.0 + o["y"], 2)
+        for e in d["enemies"]:
+            if e["type"] != "pod":
+                e["y"] = round(floor_at(e["s"], e["x"]) + 3.0 + e["y"], 2)
     # landmark beyond the end of the rail, in the fog
     t, _ = rail.frame(np.array([rail.length]))
     lp = rail.pos(np.array([rail.length]))[0] + t[0] * 700 + np.array([0, -60, 0])
@@ -115,8 +174,9 @@ def build_level(d) -> dict:
     W, F = prof(ss)
     lvl = {k: d[k] for k in ("id", "name", "mode", "speed", "ceiling", "orbs", "enemies", "checkpoints",
                              "rest_areas", "music", "fog")}
-    lvl.update({"length": round(rail.length, 1), "walls": walls_json, "palette": pal,
-                "rail": [[round(float(v), 2) for v in (*P[i], W[i], F[i])] for i in range(len(ss))]})
+    cols = np.array([floor_h(ss, o, F, d["seed"], dune) for o in FLOOR_COLS]).T  # (S, 5)
+    lvl.update({"length": round(rail.length, 1), "walls": walls_json, "palette": pal, "rocks": rocks_json,
+                "rail": [[round(float(v), 2) for v in (*P[i], W[i], F[i], *(cols[i] if dune else []))] for i in range(len(ss))]})
     write_json(ROOT / f"levels/level_{n}.json", lvl)
     (ROOT / "docs/levels").mkdir(parents=True, exist_ok=True)
     debug_map(rail, prof, lvl, ROOT / f"docs/levels/level_{n}.png")

@@ -5,7 +5,7 @@ from shapely import affinity
 import trimesh
 from meshkit import (Part, bake, extrude, extrude_profile_x, extrude_top_y, visual_hull, lathe, ico,
                      place, mirror_x, export_glb, ROOT)
-from palette import BASE
+from palette import BASE, COLOURWAYS, ramp
 
 E = BASE["e"]
 
@@ -112,6 +112,13 @@ BUILDERS = {
     "enemies/enemy_guardian": guardian, "fx/pickup_orb": orb,
 }
 BUDGET = {"ships": 1500, "enemies": 700, "fx": 300, "enemy_guardian": 4000}
+
+
+SLED_WAYS = [BASE["x"], ramp(45, 0.55), ramp(175, 0.40)]
+for _i in range(3):  # colourways: palette swap of the hull ramp only
+    BUILDERS[f"ships/ship_air_kite_c{_i}"] = (lambda i=_i: kite(COLOURWAYS[i]))
+    BUILDERS[f"ships/ship_hover_sled_c{_i}"] = (lambda i=_i: sled(SLED_WAYS[i]))
+del BUILDERS["ships/ship_air_kite"], BUILDERS["ships/ship_hover_sled"]
 
 
 def build() -> list[dict]:

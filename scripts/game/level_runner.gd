@@ -167,7 +167,7 @@ func _add_orb(sc: PackedScene, pos: Vector3, free: bool) -> void:
 
 func _build_ship() -> void:
 	ship = Ship.new()
-	var sc: PackedScene = load("res://assets/ships/ship_air_kite.glb" if mode == "air" else "res://assets/ships/ship_hover_sled.glb")
+	var sc: PackedScene = load("res://assets/ships/ship_%s_c%d.glb" % ["air_kite" if mode == "air" else "hover_sled", int(Save.data["colour"])])
 	add_child(ship)
 	ship.setup(sc, mode)
 	if mode == "hover":
@@ -374,6 +374,15 @@ func _process(dt: float) -> void:
 	speed = lerpf(speed, target_speed, 1.0 - exp(-1.2 * dt))
 	speed = minf(speed, front_cap)
 	ship.step(dt, raw, lo, hi, pull, _floor_at(s, ship.x))
+	# rocks (hover): steer around or hop over
+	for rk: Dictionary in L.get("rocks", []):
+		var rs: float = rk["s"]
+		if absf(rs - s) < float(rk["r"]) + 3.0:
+			var dx := ship.x - float(rk["x"])
+			var reach := float(rk["r"]) + 2.5
+			if absf(dx) < reach and ship.y < float(rk["top"]) + 1.0:
+				ship.x = lerpf(ship.x, float(rk["x"]) + signf(dx if dx != 0.0 else 1.0) * reach, 0.5)
+				ship.bump(Vector2(signf(dx if dx != 0.0 else 1.0), 0.0))
 	# can't move into the solid part of a wall while inside its thickness
 	for wl: Dictionary in walls:
 		if not wl["passed"] and s >= wl["s"] - wl["half"] - 3.5 and s <= wl["s"] + wl["half"] + 3.5:
@@ -648,12 +657,12 @@ func _finish() -> void:
 	AudioBus.play("sfx_jingle")
 	ship.happy()
 	hud.call("celebrate")
-	Save.record_level(Game.level_id, collected, total_orbs)
-	if bot:
+	if bot:  # tests never touch the family's progress
 		Game.quit_bot(result())
 		return
+	Save.record_level(Game.level_id, collected, total_orbs)
 	await get_tree().create_timer(4.5).timeout
-	Game.go(Game.ENDING if Game.level_id == 6 else Game.BOOK)
+	Game.go(Game.ENDING if Game.level_id == Game.last_level() else Game.BOOK)
 
 
 func result() -> Dictionary:

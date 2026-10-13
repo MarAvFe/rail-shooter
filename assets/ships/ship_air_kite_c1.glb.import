@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://uajgu04lv0ci"
-path="res://.godot/imported/ship_hover_sled.glb-a7f1acc790d6c07b09aabf113d4a5b69.scn"
+uid="uid://c33l6svujyt4p"
+path="res://.godot/imported/ship_air_kite_c1.glb-a6f69c5437fba5cb877d7899b7cb0cc7.scn"
 
 [deps]
 
-source_file="res://assets/ships/ship_hover_sled.glb"
-dest_files=["res://.godot/imported/ship_hover_sled.glb-a7f1acc790d6c07b09aabf113d4a5b69.scn"]
+source_file="res://assets/ships/ship_air_kite_c1.glb"
+dest_files=["res://.godot/imported/ship_air_kite_c1.glb-a6f69c5437fba5cb877d7899b7cb0cc7.scn"]
 
 [params]
 

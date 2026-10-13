@@ -58,25 +58,37 @@ def noise1(x, seed, octaves=3):
     return out
 
 
-def terrain_mesh(rail: Rail, prof, pal, seed: int) -> list[trimesh.Trimesh]:
+FLOOR_COLS = [-1.0, -0.5, 0.0, 0.5, 1.0]  # fractions of half-width; the game samples the same columns
+
+
+def floor_h(ss, o, F, seed, dune):
+    """Corridor floor height (rail-relative) at column fraction o. Edge columns get a small lip.
+    Shared by the mesh and the level JSON so the hover ship follows exactly what is drawn."""
+    h = -F + 1.5 * noise1(ss + o * 50, seed + 7)
+    if dune:
+        h = h + dune * (0.6 * np.sin(ss / 14.0 + o * 1.3 + seed) + 0.4 * np.sin(ss / 37.0 - o * 2.1))
+    return h + (2.0 if abs(o) == 1.0 else 0.0)
+
+
+def terrain_mesh(rail: Rail, prof, pal, seed: int, dune=0.0, side=(70, 95)) -> list[trimesh.Trimesh]:
     """Ribbon canyon. Asymmetric: each side has its own height curve and noise seed."""
     ss = np.arange(0, rail.length + STEP, STEP)
     P = rail.pos(ss)
     _, R = rail.frame(ss)
     W, F = prof(ss)
-    side_h = {-1: 70 + 30 * noise1(ss, seed + 1), 1: 95 + 40 * noise1(ss, seed + 2)}
+    side_h = {-1: side[0] + side[0] * 0.4 * noise1(ss, seed + 1), 1: side[1] + side[1] * 0.4 * noise1(ss, seed + 2)}
     us, hs = [], []
     order = [(-1, o) for o in reversed(OUTER)] + [(-1, -1.0), (0, -0.5), (0, 0.0), (0, 0.5), (1, -1.0)] + [(1, o) for o in OUTER]
     for side, o in order:
         if side == 0:  # inside floor columns: fraction of half-width
             u = o * W
-            h = -F + 1.5 * noise1(ss + o * 50, seed + 7)
+            h = floor_h(ss, o, F, seed, dune)
         elif o == -1.0:  # corridor edge
             u = side * W
-            h = -F + 2.0
+            h = floor_h(ss, float(side), F, seed, dune)
         else:
             u = side * (W + o)
-            rise = side_h[side] * (1 - np.exp(-o / 45.0))
+            rise = side_h[side] * (1 - np.exp(-o / 45.0)) + floor_h(ss, float(side), F, seed, dune) + F
             h = -F + rise + (6 + o * 0.12) * noise1(ss * 1.3 + o * 7, seed + 11 + int(o) + (side > 0) * 100)
         us.append(u)
         hs.append(h)
@@ -98,8 +110,8 @@ def terrain_mesh(rail: Rail, prof, pal, seed: int) -> list[trimesh.Trimesh]:
         m = trimesh.Trimesh(verts, np.array(faces), process=False)
         # colour by height above local floor: low = ground ramp, high = rock ramp, tops = ground again
         hgt = m.triangles_center @ UP - (P[c0:c1 + 1, 1].mean() - F[c0:c1 + 1].mean())
-        low = m.submesh([np.where(hgt < 4)[0]], append=True) if (hgt < 4).any() else None
-        mid = m.submesh([np.where((hgt >= 4) & (hgt < 85))[0]], append=True) if ((hgt >= 4) & (hgt < 85)).any() else None
+        low = m.submesh([np.where(hgt < 4 + dune * 1.2)[0]], append=True) if (hgt < 4 + dune * 1.2).any() else None
+        mid = m.submesh([np.where((hgt >= 4 + dune * 1.2) & (hgt < 85))[0]], append=True) if ((hgt >= 4 + dune * 1.2) & (hgt < 85)).any() else None
         top = m.submesh([np.where(hgt >= 85)[0]], append=True) if (hgt >= 85).any() else None
         parts = [Part(x, r, 2) for x, r in ((low, pal["m"]), (mid, pal["r"]), (top, pal["m"])) if x is not None]
         chunks.append(bake(parts))

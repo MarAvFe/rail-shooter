@@ -557,6 +557,7 @@
   "fog": "#d9e8ef",
   "light": "#fff4e0"
  },
+ "rocks": [],
  "rail": [
   [
    0.0,

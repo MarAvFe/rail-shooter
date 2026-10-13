@@ -27,6 +27,9 @@ SHAPES = {
     "lock": lambda d: [d.arc((160, 80, 352, 300), 180, 360, fill="white", width=50), d.rounded_rectangle((120, 220, 392, 430), 30, fill="white")],
     "orb": lambda d: d.polygon([(256, 70), (380, 256), (256, 442), (132, 256)], fill="white"),
     "speaker": lambda d: d.polygon([(90, 200), (180, 200), (300, 100), (300, 412), (180, 312), (90, 312)], fill="white"),
+    "cone": lambda d: [d.polygon([(256, 70), (360, 400), (152, 400)], fill="white"), d.rounded_rectangle((90, 390, 422, 450), 20, fill="white"),
+                       d.polygon([(220, 185), (292, 185), (310, 245), (202, 245)], fill=(0, 0, 0, 0)),
+                       d.polygon([(186, 295), (326, 295), (344, 350), (168, 350)], fill=(0, 0, 0, 0))],
     "ship": lambda d: d.polygon([(256, 90), (450, 380), (300, 340), (256, 400), (212, 340), (62, 380)], fill="white"),
 }
 

@@ -91,7 +91,7 @@ func record_level(n: int, orbs: int, total: int) -> void:
 
 func unlocked_colours() -> int:
 	var n := 1
-	for i: int in [2, 4, 6]:
+	for i: int in [1, 2]:  # 2-level scope (was 2, 4, 6)
 		if level(i)["cleared"]:
 			n += 1
 	return n

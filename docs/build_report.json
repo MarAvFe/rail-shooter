@@ -1,18 +1,6 @@
 {
  "actors": [
   {
-   "name": "ship_air_kite",
-   "tris": 336,
-   "col": true,
-   "budget": 1500
-  },
-  {
-   "name": "ship_hover_sled",
-   "tris": 416,
-   "col": true,
-   "budget": 1500
-  },
-  {
    "name": "enemy_drifter",
    "tris": 592,
    "col": true,
@@ -41,6 +29,42 @@
    "tris": 80,
    "col": true,
    "budget": 300
+  },
+  {
+   "name": "ship_air_kite_c0",
+   "tris": 336,
+   "col": true,
+   "budget": 1500
+  },
+  {
+   "name": "ship_hover_sled_c0",
+   "tris": 416,
+   "col": true,
+   "budget": 1500
+  },
+  {
+   "name": "ship_air_kite_c1",
+   "tris": 336,
+   "col": true,
+   "budget": 1500
+  },
+  {
+   "name": "ship_hover_sled_c1",
+   "tris": 416,
+   "col": true,
+   "budget": 1500
+  },
+  {
+   "name": "ship_air_kite_c2",
+   "tris": 336,
+   "col": true,
+   "budget": 1500
+  },
+  {
+   "name": "ship_hover_sled_c2",
+   "tris": 416,
+   "col": true,
+   "budget": 1500
   }
  ],
  "levels": [
@@ -51,6 +75,14 @@
    "orbs": 40,
    "enemies": 20,
    "min_radius_m": 571
+  },
+  {
+   "level": 2,
+   "tris": 10712,
+   "length": 1792,
+   "orbs": 36,
+   "enemies": 16,
+   "min_radius_m": 618
   }
  ],
  "audio": {
@@ -187,6 +219,7 @@
   "lock",
   "orb",
   "speaker",
+  "cone",
   "ship"
  ],
  "fails": []

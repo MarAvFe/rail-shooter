@@ -18,10 +18,11 @@ func _ready() -> void:
 	_tiles = IconMenu.new()
 	_tiles.icon_size = 80.0
 	for i in range(1, 7):
-		var open := i == 1 or bool(Save.level(i - 1)["cleared"])
+		var built := ResourceLoader.exists("res://levels/level_%d.json" % i) or FileAccess.file_exists("res://levels/level_%d.json" % i)
+		var open := built and (i == 1 or bool(Save.level(i - 1)["cleared"]))
 		var lv := Save.level(i)
-		var icon := "star" if lv["cleared"] else ("ship" if open else "lock")
-		_tiles.add_item(str(i), icon, Color(SKY[i - 1]).lightened(0.1 if lv["cleared"] else 0.0), open)
+		var icon := "star" if lv["cleared"] else ("ship" if open else ("lock" if built else "cone"))
+		_tiles.add_item(str(i), icon, Color(SKY[i - 1]).lightened(0.1 if lv["cleared"] else 0.0) if built else Color("#ffb38a"), open)
 	add_child(_tiles)
 	_colours = IconMenu.new()
 	_colours.icon_size = 80.0

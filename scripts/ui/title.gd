@@ -25,7 +25,7 @@ func _ready() -> void:
 	cam.fov = 50
 	add_child(cam)
 	for i in 2:
-		var sc: PackedScene = load(["res://assets/ships/ship_air_kite.glb", "res://assets/ships/ship_hover_sled.glb"][i])
+		var sc: PackedScene = load("res://assets/ships/ship_%s_c%d.glb" % [["air_kite", "hover_sled"][i], int(Save.data["colour"])])
 		var n: Node3D = sc.instantiate()
 		Game.paint(n)
 		n.position = Vector3(-4.5 + i * 9.0, 0.5, 0)

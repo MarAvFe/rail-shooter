@@ -20,3 +20,9 @@ Format: reading taken — reason — how to change.
 - "Hop" for hover = `steer_up` raises the target height (up to +6 m) and it springs back when released.
 - Walls: the ship cannot pass through solid. Instead of physics, the runner checks the ship's cross-section position against the wall's gap polygon as the rail reaches the wall; if outside, the rail eases to a stop and the assist drifts the ship toward the gap after 3 s (levels 1–2: magnet always on).
 - Collisions with terrain are handled analytically (corridor bounds per rail distance), not with physics bodies: cheaper and they can never trap the ship.
+
+## Scope change (user, 2026-10-13)
+- **Close at 2 levels.** Level 1 Meadow Canyon (AIR) and Level 2 Sunrise Dunes (HOVER) are complete. Levels 3–6 appear in the sticker book as "under construction" tiles (a crane/cone icon, not selectable). The ending + credits play after Level 2 for now. Adding a level = add a `level_N()` def in `tools/levels.py` + `DEFS` entry; the book unlocks it automatically when `levels/level_N.json` exists.
+- Gate A was not held as a hard stop: with the smaller scope the user asked to close, so it proceeds to a complete build. A real playtest is still pending (see the playtest guide).
+- **Pause-menu restart = last checkpoint** (gentle); keyboard `R` tap = checkpoint, hold 1 s = whole level.
+- **Rail follower:** a custom frame from `Curve3D.sample_baked` instead of `PathFollow3D` (the up vector is always world-up, so the horizon never rolls).
