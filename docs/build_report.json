@@ -83,128 +83,165 @@
    "orbs": 36,
    "enemies": 16,
    "min_radius_m": 618
+  },
+  {
+   "level": 3,
+   "tris": 14088,
+   "length": 2364,
+   "orbs": 41,
+   "enemies": 21,
+   "min_radius_m": 699
+  },
+  {
+   "level": 4,
+   "tris": 11114,
+   "length": 1786,
+   "orbs": 39,
+   "enemies": 13,
+   "min_radius_m": 664
+  },
+  {
+   "level": 5,
+   "tris": 14464,
+   "length": 2380,
+   "orbs": 39,
+   "enemies": 19,
+   "min_radius_m": 794
+  },
+  {
+   "level": 6,
+   "tris": 14186,
+   "length": 2371,
+   "orbs": 38,
+   "enemies": 14,
+   "min_radius_m": 571
   }
  ],
  "audio": {
   "sfx_shot": {
-   "peak": -16.0,
-   "rms": -24.8,
+   "peak": -22.0,
+   "rms": -31.8,
    "seam": 0.0
   },
   "sfx_puff": {
-   "peak": -12.0,
-   "rms": -27.3,
+   "peak": -16.0,
+   "rms": -31.8,
    "seam": 0.0
   },
   "sfx_chime_0": {
-   "peak": -12.0,
-   "rms": -24.2,
+   "peak": -16.0,
+   "rms": -31.0,
    "seam": 0.0
   },
   "sfx_chime_1": {
-   "peak": -12.0,
-   "rms": -24.2,
+   "peak": -16.0,
+   "rms": -30.3,
    "seam": 0.0
   },
   "sfx_chime_2": {
-   "peak": -12.0,
-   "rms": -24.2,
+   "peak": -16.0,
+   "rms": -31.0,
    "seam": 0.0
   },
   "sfx_chime_3": {
-   "peak": -12.0,
-   "rms": -24.1,
+   "peak": -16.0,
+   "rms": -32.4,
    "seam": 0.0
   },
   "sfx_chime_4": {
-   "peak": -12.0,
-   "rms": -24.2,
+   "peak": -16.0,
+   "rms": -30.8,
    "seam": 0.0
   },
   "sfx_chime_5": {
-   "peak": -12.0,
-   "rms": -24.1,
+   "peak": -16.0,
+   "rms": -29.7,
    "seam": 0.0
   },
   "sfx_chime_6": {
-   "peak": -12.0,
-   "rms": -24.1,
+   "peak": -16.0,
+   "rms": -31.4,
    "seam": 0.0
   },
   "sfx_chime_7": {
-   "peak": -12.0,
-   "rms": -24.2,
+   "peak": -16.0,
+   "rms": -30.7,
    "seam": 0.0
   },
   "sfx_boop": {
-   "peak": -14.0,
-   "rms": -22.2,
+   "peak": -18.0,
+   "rms": -26.6,
+   "seam": 0.0
+  },
+  "sfx_hit": {
+   "peak": -24.0,
+   "rms": -33.3,
    "seam": 0.0
   },
   "sfx_honk": {
-   "peak": -12.0,
-   "rms": -22.3,
+   "peak": -16.0,
+   "rms": -30.9,
    "seam": 0.0
   },
   "sfx_gap": {
-   "peak": -12.0,
-   "rms": -25.0,
+   "peak": -16.0,
+   "rms": -32.4,
    "seam": 0.0
   },
   "sfx_blip": {
-   "peak": -16.0,
-   "rms": -25.7,
-   "seam": 0.0001
+   "peak": -20.0,
+   "rms": -30.0,
+   "seam": 0.0
   },
   "sfx_jingle": {
-   "peak": -10.0,
-   "rms": -19.1,
+   "peak": -14.0,
+   "rms": -25.6,
    "seam": 0.0
   },
   "loop_engine": {
-   "peak": -28.0,
-   "rms": -33.6,
-   "seam": 0.0011
+   "peak": -32.0,
+   "rms": -44.0,
+   "seam": 0.0001
   },
   "music_title": {
-   "peak": -9.0,
-   "rms": -19.2,
-   "seam": 0.0029
+   "peak": -12.0,
+   "rms": -23.5,
+   "seam": 0.0002
   },
   "music_meadow": {
-   "peak": -9.0,
-   "rms": -19.7,
-   "seam": 0.0031
+   "peak": -12.0,
+   "rms": -24.1,
+   "seam": 0.0001
   },
   "music_dunes": {
-   "peak": -9.0,
-   "rms": -19.6,
-   "seam": 0.0047
+   "peak": -12.0,
+   "rms": -22.5,
+   "seam": 0.0021
   },
   "music_ridge": {
-   "peak": -9.0,
-   "rms": -19.7,
-   "seam": 0.0047
+   "peak": -12.0,
+   "rms": -23.7,
+   "seam": 0.0004
   },
   "music_crystal": {
-   "peak": -9.0,
-   "rms": -20.0,
-   "seam": 0.0042
+   "peak": -12.0,
+   "rms": -22.5,
+   "seam": 0.0004
   },
   "music_mist": {
-   "peak": -9.0,
-   "rms": -19.6,
-   "seam": 0.0035
+   "peak": -12.0,
+   "rms": -22.6,
+   "seam": 0.0003
   },
   "music_gate": {
-   "peak": -9.0,
-   "rms": -19.9,
-   "seam": 0.0034
+   "peak": -12.0,
+   "rms": -23.2,
+   "seam": 0.0022
   },
   "music_ending": {
-   "peak": -9.0,
-   "rms": -19.5,
-   "seam": 0.0012
+   "peak": -12.0,
+   "rms": -22.8,
+   "seam": 0.0033
   }
  },
  "icons": [

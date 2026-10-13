@@ -13,12 +13,13 @@ var base := Vector2.ZERO
 var offset := Vector2.ZERO  # current cross-section position
 var phase := 0.0
 var hp := 1
-var state := "wait"  # wait -> live -> dying -> dead
+var state := "wait"  # wait -> live -> dying -> dead   (guardian: live -> asleep)
 var age := 0.0
 var fire_t := 0.0
 var model: Node3D
 var _hit := 0.0
 var _die := 0.0
+var _mat: StandardMaterial3D
 
 
 func setup(d: Dictionary, scene: PackedScene) -> void:
@@ -31,6 +32,11 @@ func setup(d: Dictionary, scene: PackedScene) -> void:
 	model = scene.instantiate()
 	add_child(model)
 	Game.paint(model)
+	if kind == "guardian":  # own material: each hit makes it glow lighter
+		_mat = Game.vc_mat.duplicate()
+		_mat.albedo_color = Color(0.62, 0.62, 0.72)
+		for n in model.find_children("*", "MeshInstance3D", true, false):
+			(n as MeshInstance3D).material_override = _mat
 	visible = false
 	scale = Vector3.ONE * 0.01
 
@@ -73,8 +79,13 @@ func update(dt: float) -> void:
 	model.rotation.y = sin(t * 0.7) * 0.4
 	if kind == "guardian":
 		var lit := 1.0 - float(hp) / float(HP[kind])
-		model.scale = Vector3.ONE  # glow grows with hits via modulate on material copy (cheap: vertex tint later)
-		model.position.y = lit * 2.0
+		_mat.albedo_color = Color(0.62, 0.62, 0.72).lerp(Color.WHITE, lit)
+		if state == "asleep":  # dozing lamp: slow breathing, no sway
+			model.rotation.y = 0.0
+			model.position.y = sin(Game.t * PI * 0.5) * 0.6
+		elif state == "live" and age > 45.0:  # never blocks the ending: dozes off on its own
+			hp = 0
+			_fall_asleep()
 
 
 func hit() -> void:
@@ -83,8 +94,16 @@ func hit() -> void:
 	hp -= 1
 	_hit = 0.3
 	if hp <= 0:
+		if kind == "guardian":
+			_fall_asleep()
+			return
 		state = "dying"
 		_die = 0.0
+
+
+func _fall_asleep() -> void:
+	state = "asleep"
+	popped.emit(self)
 
 
 func alive() -> bool:

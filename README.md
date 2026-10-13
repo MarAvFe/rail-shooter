@@ -39,9 +39,12 @@ Export templates: only `windows_release_x86_64.exe` and `linux_release.x86_64` a
 |---|---|---|---|
 | 1 | Meadow Canyon | AIR (Kite) | steer, fire, orbs, 2 huge gaps, Drifters |
 | 2 | Sunrise Dunes | HOVER (Sled) | dune-following, hop over rocks, low arch gap, first Pods |
-| 3–6 | *under construction* | | shown as 🚧 cones in the sticker book |
+| 3 | Cloud Ridge | AIR | 3 walls with uneven gaps (34/30/28 m), Pods |
+| 4 | Crystal River | HOVER | narrower gorge, crystal clusters to hop, arches, Buzzers |
+| 5 | Mist Peaks | AIR | floating islands, slowly sliding wall gaps, mixed critters |
+| 6 | Sky Gate | AIR | level 1's canyon at giant scale, dawn→sunrise, the Guardian dozes off and lights the Gate |
 
-Enemies: **Drifter** (round, fins, floats in clusters), **Pod** (mushroom, puffs one slow harmless bubble every 3 s), **Buzzer** (crescent, figure-8; built, not yet placed), **Guardian** (built, for the finale).
+Enemies: **Drifter** (round, fins, floats in clusters), **Pod** (mushroom, puffs one slow harmless bubble every 3 s), **Buzzer** (crescent, slow figure-8), **Guardian** (huge and round; it glows lighter with each hit, and after about 25 hits, or 45 s on its own, it falls asleep and becomes the Gate's lamp).
 Each level takes about 2.5–3 min. There's a checkpoint about every 45 s, and the ending plays after the last built level.
 
 ### Add a level
@@ -59,8 +62,7 @@ No per-level code exists in the game. `scripts/game/level_runner.gd` loads every
 
 ## Known issues / what a human should touch up
 - **Art (needs a 3D artist):** canyon floors are flat colour bands. Props (moss, crashed ship, birds) aren't placed yet. Outlines are off. The Kite's engines read a little like logs from behind.
-- **Sound (needs a sound designer):** synth effects are serviceable. Music is a simple pentatonic loop, so a human composer would lift it a lot.
-- The Guardian and Buzzer are modelled but unused until levels 3–6.
+- **Sound:** smoothed in round 5 (soft attacks, low-pass, small reverb, anti-stacking). Music is still a simple pentatonic loop, so a human composer would lift it a lot.
 - GDScript can't catch runtime errors globally. Missing assets fall back silently, but a script bug would not auto-return to the title.
 - Retro mode pixelates the UI too, so the parent menu text is soft at 640×360. It's still readable.
 - Bot runs leave Godot "resources still in use at exit" warnings (cosmetic).

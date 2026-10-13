@@ -12,7 +12,7 @@ var _timeout := 0.0
 
 
 func _ready() -> void:
-	_rng.seed = 7
+	_rng.seed = int(Game.args.get("seed", "7"))
 
 
 func _process(dt: float) -> void:

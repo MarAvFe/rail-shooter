@@ -25,12 +25,12 @@ LEVELS = {
         "sky": ["#f5b39a", "#ffe9c7"], "fog": "#fbdcc4", "light": "#ffe2c0"},
     3: {"r": ramp(215, 0.30, 0.28, 0.86), "m": ramp(200, 0.25, 0.50, 0.95),
         "sky": ["#7fb4ea", "#e8f3ff"], "fog": "#dfeaf7", "light": "#ffffff"},
-    4: {"r": ramp(300, 0.35, 0.28, 0.84), "m": ramp(270, 0.40, 0.34, 0.86),
+    4: {"c": ramp(320, 0.45, 0.45, 0.95), "r": ramp(300, 0.35, 0.28, 0.84), "m": ramp(270, 0.40, 0.34, 0.86),
         "sky": ["#c9a3e8", "#ffe1f0"], "fog": "#efd8ee", "light": "#fff0f6"},
     5: {"r": ramp(260, 0.22, 0.30, 0.82), "m": ramp(150, 0.25, 0.40, 0.85),
         "sky": ["#a99ad6", "#f2e6f7"], "fog": "#ddd3ec", "light": "#fff7ec"},
     6: {"r": ramp(28, 0.22, 0.34, 0.82), "w": ramp(262, 0.22, 0.42, 0.86), "m": ramp(95, 0.45, 0.32, 0.84),
-        "sky": ["#f6a98f", "#ffeec2"], "fog": "#f7dcc8", "light": "#ffe6b8"},
+        "sky": ["#5d5a8f", "#f6a98f"], "sky_end": ["#8ec9f0", "#fff1d6"], "fog": "#f7dcc8", "light": "#ffe6b8"},
 }
 
 

@@ -26,3 +26,9 @@ Format: reading taken — reason — how to change.
 - Gate A was not held as a hard stop: with the smaller scope the user asked to close, so it proceeds to a complete build. A real playtest is still pending (see the playtest guide).
 - **Pause-menu restart = last checkpoint** (gentle); keyboard `R` tap = checkpoint, hold 1 s = whole level.
 - **Rail follower:** a custom frame from `Curve3D.sample_baked` instead of `PathFollow3D` (the up vector is always world-up, so the horizon never rolls).
+
+## All levels (user, 2026-10-13, later)
+- Levels 3–6 were added as data in `tools/levels.py`. Sliding gaps (L5) move the wall and its trim nodes and the gap polygon sideways, and a ship inside the thickness rides along. Colour unlocks are back to L2/L4/L6.
+- **Guardian:** it drifts 70 m ahead of the ship and holds the rail before the Gate. Each hit lightens its material, and at hp 0 it "falls asleep" (stays visible, glows) and lights the Gate. If the child never fires, it dozes off after 45 s, so the ending is never blocked.
+- **Bug found by the bad-pilot bot:** a ship parked at a wall's front face was treated as "inside the wall" and frozen. The fix applies the thickness rule only strictly inside the wall. Verified with 4 extra seeds × 6 levels.
+- **Sound** "make it smooth": 32 kHz, sine voices, raised-cosine attacks, low-pass, small comb/allpass reverb, all peaks lowered by 4–6 dB, engine bed changed from a hum to soft wind, and runtime anti-stacking (70 ms per sound, max 2 copies).

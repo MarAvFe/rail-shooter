@@ -54,6 +54,10 @@ var sparkle: CPUParticles3D
 var bot: Node = null
 var _cam_look := Vector3.ZERO
 var touring := false
+var _sky_mat: ProceduralSkyMaterial
+var _world_root: Node
+var guardian: Enemy = null
+var gate_lit := false
 
 
 func _ready() -> void:
@@ -85,7 +89,7 @@ func _ready() -> void:
 	var hum := AudioStreamPlayer.new()  # engine bed, far under the music
 	hum.stream = AudioBus.stream("loop_engine", true)
 	hum.bus = "SFX"
-	hum.volume_db = -4.0
+	hum.volume_db = 0.0
 	add_child(hum)
 	hum.play()
 	speed = base_speed * 0.5
@@ -111,6 +115,7 @@ func _build_env() -> void:
 	sm.ground_bottom_color = Color(pal["fog"])
 	sm.sun_angle_max = 1.0
 	sky.sky_material = sm
+	_sky_mat = sm
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -137,6 +142,7 @@ func _build_world() -> void:
 	var kit: PackedScene = load("res://assets/kits/level_%d.glb" % Game.level_id)
 	var world := kit.instantiate()
 	add_child(world)
+	_world_root = world
 	for n: Node in world.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
 		mi.material_override = Game.glow_mat if mi.name.begins_with("trim_") or mi.get_parent().name.begins_with("trim_") else Game.vc_mat
@@ -145,8 +151,16 @@ func _build_world() -> void:
 		var poly := PackedVector2Array()
 		for p: Array in w["gap"]:
 			poly.append(Vector2(p[0], p[1]))
+		var mv: Array = w.get("move", [0, 1])
+		var nodes: Array[Node3D] = []
+		for nm: String in ["wall_%d" % i, "trim_%d" % i]:
+			var nd := world.find_child(nm, true, false) as Node3D
+			if nd:
+				nodes.append(nd)
 		walls.append({"s": float(w["s"]), "half": float(w["thickness"]) * 0.5, "gap": poly,
-			"centre": Vector2(w["centre"][0], w["centre"][1]), "passed": false})
+			"centre0": Vector2(w["centre"][0], w["centre"][1]), "centre": Vector2(w["centre"][0], w["centre"][1]),
+			"passed": false, "ddx": 0.0, "amp": float(mv[0]), "period": maxf(float(mv[1]), 1.0), "dx": 0.0, "nodes": nodes,
+			"base": nodes.map(func(n: Node3D) -> Vector3: return n.position)})
 	var scenes := {}
 	for e: Dictionary in L["enemies"]:
 		var k := str(e["type"])
@@ -159,6 +173,8 @@ func _build_world() -> void:
 		add_child(en)
 		en.popped.connect(_on_popped)
 		enemies.append(en)
+		if k == "guardian":
+			guardian = en
 	var orb_scene: PackedScene = load("res://assets/fx/pickup_orb.glb")
 	for o: Dictionary in L["orbs"]:
 		_add_orb(orb_scene, _world(float(o["s"]), Vector2(o["x"], o["y"])), false)
@@ -340,6 +356,14 @@ func _process(dt: float) -> void:
 	var pull := Vector2.ZERO
 	var target_speed := base_speed * float(Save.setting("speed")) * (1.0 - 0.25 * assist)
 	var front_cap := INF
+	_update_walls()
+	if L.get("guardian_hold") != null and guardian and guardian.state in ["wait", "live"]:
+		front_cap = sqrt(2.0 * 3.0 * maxf(float(L["guardian_hold"]) - s, 0.0))  # wait for the Guardian to doze off
+	if _sky_mat and L["palette"].has("sky_end"):
+		var k := clampf(s / length, 0.0, 1.0) if not gate_lit else 1.0
+		_sky_mat.sky_top_color = Color(L["palette"]["sky"][0]).lerp(Color(L["palette"]["sky_end"][0]), k)
+		_sky_mat.sky_horizon_color = Color(L["palette"]["sky"][1]).lerp(Color(L["palette"]["sky_end"][1]), k)
+		_sky_mat.ground_horizon_color = _sky_mat.sky_horizon_color
 	var prev := ship.pos2()
 	var in_wall := false
 	for wl: Dictionary in walls:
@@ -349,7 +373,7 @@ func _process(dt: float) -> void:
 		var d := front - s
 		if d > 160.0:
 			break
-		var inside := Geometry2D.is_point_in_polygon(ship.pos2(), wl["gap"])
+		var inside := _in_gap(wl, ship.pos2())
 		var to_gap: Vector2 = wl["centre"] - ship.pos2()
 		var magnet := 0.0
 		if Game.level_id <= 2:
@@ -392,8 +416,10 @@ func _process(dt: float) -> void:
 				ship.bump(Vector2(signf(dx if dx != 0.0 else 1.0), 0.0))
 	# can't move into the solid part of a wall while inside its thickness
 	for wl: Dictionary in walls:
-		if not wl["passed"] and s >= wl["s"] - wl["half"] - 3.5 and s <= wl["s"] + wl["half"] + 3.5:
-			if not Geometry2D.is_point_in_polygon(ship.pos2(), wl["gap"]):
+		# strictly inside the thickness: a ship parked at the front face must stay free to steer to the gap
+		if not wl["passed"] and s > wl["s"] - wl["half"] - 3.5 + 0.05 and s <= wl["s"] + wl["half"] + 3.5:
+			ship.x += float(wl["ddx"])  # ride along with a sliding gap
+			if not _in_gap(wl, ship.pos2()):
 				ship.x = prev.x
 				ship.y = prev.y
 				ship.bump((Vector2(wl["centre"]) - prev).normalized())
@@ -412,6 +438,25 @@ func _process(dt: float) -> void:
 		request_pause()
 	if s >= length - 0.5:
 		_finish()
+
+
+## Sliding gaps (level 5+): the wall + trim slide sideways slowly; the gap polygon follows.
+func _update_walls() -> void:
+	for wl: Dictionary in walls:
+		var dx := 0.0
+		if float(wl["amp"]) > 0.0:
+			dx = float(wl["amp"]) * sin(TAU * Game.t / float(wl["period"]))
+		wl["ddx"] = dx - float(wl["dx"])
+		wl["dx"] = dx
+		wl["centre"] = Vector2(wl["centre0"]) + Vector2(dx, 0.0)
+		if dx != 0.0:
+			var off := basis_at(float(wl["s"])).x * dx
+			for i in (wl["nodes"] as Array).size():
+				(wl["nodes"][i] as Node3D).position = (wl["base"][i] as Vector3) + off
+
+
+func _in_gap(wl: Dictionary, p: Vector2) -> bool:
+	return Geometry2D.is_point_in_polygon(p - Vector2(float(wl["dx"]), 0.0), wl["gap"])
 
 
 func _place_ship() -> void:
@@ -436,7 +481,9 @@ func _update_enemies(dt: float) -> void:
 	for e in enemies:
 		if e.state == "wait" and s > e.s - SPAWN_AHEAD:
 			e.activate()
-		if e.state == "live" or e.state == "dying":
+		if e.kind == "guardian" and e.state == "live":
+			e.s = maxf(e.s, s + 70.0)  # drifts ahead, waiting in front of the Gate
+		if e.state == "live" or e.state == "dying" or e.state == "asleep":
 			e.update(dt)
 			if e.state == "dead":
 				continue
@@ -533,7 +580,7 @@ func _update_combat(dt: float) -> void:
 			if e.alive() and n.global_position.distance_to(e.global_position) < e.radius():
 				e.hit()
 				sh["life"] = 0.0
-				AudioBus.play("sfx_boop", 1.6, -6.0)
+				AudioBus.play("sfx_hit")
 				break
 		if sh["life"] <= 0.0:
 			sh["live"] = false
@@ -545,6 +592,9 @@ func _angle_to(origin: Vector3, fwd: Vector3, e: Enemy) -> float:
 
 
 func _on_popped(e: Enemy) -> void:
+	if e.kind == "guardian":
+		_light_gate(e)
+		return
 	AudioBus.play("sfx_puff")
 	for p in puffs:
 		if not p.emitting:
@@ -555,6 +605,18 @@ func _on_popped(e: Enemy) -> void:
 	var n := 1 + int(e.phase * 10.0) % 3 if e.kind != "guardian" else 0
 	for i in n:
 		_add_orb(sc, e.global_position + Vector3(randf_range(-2, 2), randf_range(-1, 2), randf_range(-2, 2)), true)
+	enemy_popped.emit()
+
+
+func _light_gate(e: Enemy) -> void:
+	gate_lit = true
+	AudioBus.play("sfx_jingle")
+	sparkle.global_position = e.global_position
+	sparkle.restart()
+	Game.paint(e.model, true)
+	var gn := _world_root.find_child("gate_0", true, false)
+	if gn:
+		Game.paint(gn, true)
 	enemy_popped.emit()
 
 
@@ -703,6 +765,8 @@ func _shot_tour() -> void:
 	for e in enemies:
 		stops.append(e.s - 60.0)
 		break
+	if L.get("gate") != null:
+		stops.append(float(L["gate"]["s"]) - 140.0)
 	stops.append(length - 40.0)
 	stops.sort()
 	touring = true

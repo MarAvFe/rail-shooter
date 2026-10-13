@@ -321,6 +321,8 @@
   110,
   420
  ],
+ "gate": null,
+ "guardian_hold": null,
  "length": 1792.0,
  "walls": [
   {
@@ -391,7 +393,11 @@
     -4.08,
     -3.04
    ],
-   "thickness": 10.0
+   "thickness": 10.0,
+   "move": [
+    0,
+    1
+   ]
   }
  ],
  "palette": {

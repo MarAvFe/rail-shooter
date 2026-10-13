@@ -10,6 +10,7 @@ var _cur := 0
 var _cache: Dictionary = {}
 var _chime := 0
 var _chime_t := 0.0
+var _last: Dictionary = {}  # sound -> last start time (anti-stacking)
 
 
 func _ready() -> void:
@@ -58,6 +59,17 @@ func play(name: String, pitch := 1.0, vol_db := 0.0) -> void:
 	var s := stream(name)
 	if s == null:
 		return
+	# the same sound never restarts within 70 ms, and at most 2 copies overlap: no harsh stacking
+	var now := Time.get_ticks_msec()
+	if now - int(_last.get(name, -1000)) < 70:
+		return
+	var copies := 0
+	for p in _sfx:
+		if p.playing and p.stream == s:
+			copies += 1
+	if copies >= 2:
+		return
+	_last[name] = now
 	for p in _sfx:
 		if not p.playing:
 			p.stream = s
