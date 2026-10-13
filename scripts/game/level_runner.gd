@@ -54,6 +54,8 @@ var sparkle: CPUParticles3D
 var bot: Node = null
 var _cam_look := Vector3.ZERO
 var touring := false
+var birds: Array[Dictionary] = []  # {node, centre, r, phase}
+var _resume_t := -10.0
 var engine: AudioStreamPlayer
 var _sky_mat: ProceduralSkyMaterial
 var _world_root: Node
@@ -176,6 +178,15 @@ func _build_world() -> void:
 		enemies.append(en)
 		if k == "guardian":
 			guardian = en
+	var bird_scene: PackedScene = load("res://assets/fx/bird.glb")
+	for b: Dictionary in L.get("birds", []):
+		var c := _world(float(b["s"]), Vector2(b["x"], b["y"]))
+		for k in 3:
+			var n: Node3D = bird_scene.instantiate()
+			Game.paint(n)
+			n.scale = Vector3.ONE * 1.6
+			add_child(n)
+			birds.append({"node": n, "centre": c + Vector3(0, k * 2.5, 0), "r": 9.0 + k * 3.0, "phase": k * 2.1 + float(b["s"])})
 	var orb_scene: PackedScene = load("res://assets/fx/pickup_orb.glb")
 	for o: Dictionary in L["orbs"]:
 		_add_orb(orb_scene, _world(float(o["s"]), Vector2(o["x"], o["y"])), false)
@@ -355,7 +366,7 @@ func _process(dt: float) -> void:
 	var lo := Vector2(-w + 5.0, f + 4.0)
 	var hi := Vector2(w - 5.0, float(L["ceiling"]))
 	var pull := Vector2.ZERO
-	var target_speed := base_speed * float(Save.setting("speed")) * (1.0 - 0.25 * assist)
+	var target_speed := base_speed * float(Game.args.get("speed", Save.setting("speed"))) * (1.0 - 0.25 * assist)
 	var front_cap := INF
 	_update_walls()
 	if L.get("guardian_hold") != null and guardian and guardian.state in ["wait", "live"]:
@@ -436,6 +447,7 @@ func _process(dt: float) -> void:
 		engine.pitch_scale = (1.25 if mode == "hover" else 1.0) * (0.8 + 0.25 * k) + ship.inp.length() * 0.05
 		engine.volume_db = lerpf(-14.0, -3.0, clampf(k, 0.0, 1.0))
 	_update_enemies(dt)
+	_update_birds()
 	_update_combat(dt)
 	_update_orbs(dt)
 	_restart_input(dt)
@@ -480,6 +492,17 @@ func _cam_follow(dt: float, snap := false) -> void:
 	cam.global_position = cam.global_position.lerp(want, kp)
 	_cam_look = _cam_look.lerp(look, kr)
 	cam.look_at(_cam_look, UP)
+
+
+func _update_birds() -> void:
+	for b in birds:
+		var a := Game.t * 0.35 + float(b["phase"])
+		var c: Vector3 = b["centre"]
+		var r: float = b["r"]
+		var n: Node3D = b["node"]
+		var p := c + Vector3(cos(a) * r, sin(a * 2.0) * 1.5, sin(a) * r)
+		n.look_at_from_position(p, c + Vector3(cos(a + 0.2) * r, 0.0, sin(a + 0.2) * r), UP)
+		n.rotate_object_local(Vector3.FORWARD, sin(Game.t * TAU * 1.5 + float(b["phase"])) * 0.45)  # wing wobble
 
 
 func _update_enemies(dt: float) -> void:
@@ -698,7 +721,12 @@ func _update_assist(dt: float) -> void:
 
 
 func request_pause() -> void:
-	if finished or get_tree().paused or bot != null:
+	if finished or bot != null:
+		return
+	if pause_layer != null and is_instance_valid(pause_layer):  # only ever one pause screen
+		get_tree().paused = true
+		return
+	if get_tree().paused or Game.t - _resume_t < 0.25:  # the Esc that just resumed must not re-pause
 		return
 	get_tree().paused = true
 	pause_layer = CanvasLayer.new()
@@ -716,6 +744,7 @@ func request_pause() -> void:
 	m.add_item("speed", "speed_%d" % (_speed_idx() + 1), Color("#b9e3a0"))
 	pause_layer.add_child(m)
 	m.position -= Vector2(m.get_combined_minimum_size().x / 2, 64)
+	m.back_id = "resume"
 	m.chosen.connect(_on_pause_choice)
 	add_child(pause_layer)
 
@@ -740,7 +769,9 @@ func _on_pause_choice(id: String) -> void:
 		AudioBus.play("sfx_honk", 0.9 + 0.1 * i)
 		return
 	pause_layer.queue_free()
+	pause_layer = null
 	get_tree().paused = false
+	_resume_t = Game.t
 	match id:
 		"restart":
 			to_checkpoint()
@@ -748,9 +779,12 @@ func _on_pause_choice(id: String) -> void:
 			Game.go(Game.BOOK)
 
 
-func _unhandled_input(ev: InputEvent) -> void:
-	if get_tree().paused and pause_layer and is_instance_valid(pause_layer) and ev.is_action_pressed("pause"):
-		_on_pause_choice("resume")
+## Parent menu closed: back to the existing pause screen (or open one) — never straight into play.
+func parent_menu_closed() -> void:
+	if pause_layer != null and is_instance_valid(pause_layer):
+		get_tree().paused = true
+	else:
+		request_pause()
 
 
 func _finish() -> void:

@@ -13,7 +13,7 @@ out=$($GODOT --headless --path . -- --test 2>&1 | grep "TEST"); [[ $out == *PASS
 for f in levels/level_*.json; do
   n=$(basename "$f" .json | cut -d_ -f2)
   for b in good bad; do
-    out=$(timeout 600 $GODOT --headless --path . --fixed-fps 60 -- --level=$n --bot=$b 2>&1)
+    out=$(timeout 600 $GODOT --headless --path . --fixed-fps 60 -- --level=$n --bot=$b --speed=1.0 2>&1)
     res=$(echo "$out" | grep BOT_RESULT | cut -d' ' -f2-)
     errs=$(echo "$out" | grep -c "SCRIPT ERROR")
     [[ $res == *'"ok":true'* && $errs == 0 ]] && row "level $n bot:$b" PASS "$res" || row "level $n bot:$b" FAIL "errors=$errs $res"

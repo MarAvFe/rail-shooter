@@ -10,7 +10,7 @@ Evidence comes from `tools/run_tests.sh` (ALL PASS), screenshots in `docs/shots/
 - [x] **Parent menu:** volumes, speed, retro, fullscreen, invert, learn-mode rebinding, deadzone, reset controls, reset save (2 s hold), credits, language (en/es), quit. Evidence: `docs/shots/parent.png`.
 - [x] **Rebinding for keyboard and unknown pad.** Evidence: the `--test` self-test learns a raw pad button as FIRE and a raw axis as LEFT (including menu mirroring), then resets. The menu shows live axis and button values. *Not tested with a physical PS2 adapter, which needs your playtest.*
 - [x] **Save/load survives deleted, corrupt and wrong-typed files.** Evidence: the `--test` self-test (PASS). Writes are atomic (temp file + rename).
-- [x] **Audio:** a music loop per biome plus title and ending, all effects, an engine bed and a limiter. Evidence: `docs/build_report.json`. Music peaks at −12 dBFS, effects at −14 to −24 and the engine wind at −32. Loop seams are < 0.004, and loops are an integer number of bars.
+- [x] **Audio:** a music loop per biome plus title and ending, all effects, an engine bed and a limiter. Evidence: `docs/build_report.json`. Music peaks at −12 dBFS, effects at −14 to −24, and the engine hum at −14 (played 3–14 dB lower, following speed). Imports are uncompressed PCM at 44.1 kHz, the reverb is convolution-based, Loop seams are < 0.004, and loops are an integer number of bars.
 - [x] **Good and bad bots finish every level with no script errors.**
 
   | | good | bad (random holds + mashing) |
@@ -22,4 +22,4 @@ Evidence comes from `tools/run_tests.sh` (ALL PASS), screenshots in `docs/shots/
 - [x] **README.md:** run, controls, one-command rebuild, tests, how to add a level, known issues.
 - [x] **Git history** has a commit per milestone.
 
-Not done, by design or deferred: outlines, props/wear details (crashed ship, birds, moss) (budget mode, see DECISIONS.md). A human playtest is still pending (`docs/PLAYTEST.md`).
+Not done, by design or deferred: hand-made art polish, human-composed music (budget mode, see DECISIONS.md). A human playtest is still pending (`docs/PLAYTEST.md`).

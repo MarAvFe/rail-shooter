@@ -12,6 +12,7 @@ var level_id := 1
 var args: Dictionary = {}
 var vc_mat: StandardMaterial3D
 var glow_mat: StandardMaterial3D
+var actor_mat: StandardMaterial3D  ## vertex colour + outline pass (ships, critters, props)
 var _parent_menu: Node = null
 var _fade: ColorRect
 
@@ -26,6 +27,7 @@ func _ready() -> void:
 	vc_mat.vertex_color_use_as_albedo = true
 	glow_mat = vc_mat.duplicate()
 	glow_mat.disable_fog = true
+	actor_mat = vc_mat  # outlines are baked into the meshes (tools/meshkit.outline_shell)
 	Bindings.parent_menu_requested.connect(open_parent_menu)
 	var cl := CanvasLayer.new()
 	cl.layer = 100
@@ -73,9 +75,13 @@ func start_level(n: int) -> void:
 
 
 ## Apply flat vertex-colour material to every mesh under `root`.
-func paint(root: Node, glow := false) -> void:
+func paint(root: Node, glow := false, outline := true) -> void:
 	for n in root.find_children("*", "MeshInstance3D", true, false):
-		(n as MeshInstance3D).material_override = glow_mat if glow else vc_mat
+		(n as MeshInstance3D).material_override = glow_mat if glow else (actor_mat if outline else vc_mat)
+
+
+func parent_open() -> bool:
+	return _parent_menu != null and is_instance_valid(_parent_menu) and not _parent_menu.is_queued_for_deletion()
 
 
 func open_parent_menu() -> void:
@@ -191,5 +197,25 @@ func _self_test() -> void:
 			var w := FileAccess.open(p, FileAccess.WRITE)
 			w.store_string(backup[p])
 			w.close()
-	print("TEST input+save: ", "PASS" if fails.is_empty() else "FAIL " + ", ".join(fails))
+	# 4. pause <-> parent menu flow (the stacked-pause bug): exactly one pause screen, never playable under it
+	get_tree().change_scene_to_file(LEVEL)
+	for i in 10:
+		await get_tree().process_frame
+	var lvl := get_tree().current_scene
+	var layers := func() -> int: return lvl.get_children().filter(func(c: Node) -> bool: return c is CanvasLayer and c.process_mode == Node.PROCESS_MODE_ALWAYS).size()
+	lvl.call("request_pause")
+	open_parent_menu()
+	await get_tree().process_frame
+	_parent_menu.call("close")
+	for i in 3:
+		await get_tree().process_frame
+	lvl.call("request_pause")
+	await get_tree().process_frame
+	if layers.call() != 1 or not get_tree().paused:
+		fails.append("pause after parent menu: layers=%d paused=%s" % [layers.call(), get_tree().paused])
+	lvl.call("_on_pause_choice", "resume")
+	await get_tree().process_frame
+	if layers.call() != 0 or get_tree().paused:
+		fails.append("resume: layers=%d paused=%s" % [layers.call(), get_tree().paused])
+	print("TEST input+save+pause: ", "PASS" if fails.is_empty() else "FAIL " + ", ".join(fails))
 	get_tree().quit(0 if fails.is_empty() else 1)

@@ -76,12 +76,12 @@ func update(dt: float) -> void:
 			popped.emit(self)
 			return
 	scale = Vector3.ONE * maxf(sc, 0.01)
-	model.rotation.y = sin(t * 0.7) * 0.4
+	model.rotation.y = PI + sin(t * 0.7) * 0.4  # faces are modelled on -Z (travel direction): turn them to the player
 	if kind == "guardian":
 		var lit := 1.0 - float(hp) / float(HP[kind])
 		_mat.albedo_color = Color(0.62, 0.62, 0.72).lerp(Color.WHITE, lit)
 		if state == "asleep":  # dozing lamp: slow breathing, no sway
-			model.rotation.y = 0.0
+			model.rotation.y = PI
 			model.position.y = sin(Game.t * PI * 0.5) * 0.6
 		elif state == "live" and age > 45.0:  # never blocks the ending: dozes off on its own
 			hp = 0

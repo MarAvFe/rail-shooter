@@ -6,3 +6,7 @@
 - R5 audio: all sounds rebuilt smooth (sine voices, raised-cosine attacks, low-pass, small reverb, 32 kHz), quieter peaks; engine hum -> soft wind; AudioBus anti-stacking (70 ms, max 2 copies); hit tick replaces pitched boop.
 - R6 levels 3-6: added as data; L6 Gate + Guardian + sunrise sky; fixed wall-front freeze found by bad bot.
 - R7 audio: crispiness = Godot's default lossy QOA WAV import -> PCM (importer_defaults); engine -> audible 110 Hz hum following speed; shot -> soft zap. UI: pause-menu speed chevrons, finer parent speed steps, title gear (hold 1.5 s).
+- R8 audio: comb reverb -> convolution with a smooth decaying noise impulse (no periodic buzz); 44.1 kHz (= mix rate, no resampling); chimes/sparkle an octave lower; honk pure sines; engine harmonics trimmed.
+- R9 look: inverted-hull outlines baked into actor/prop meshes (darkest shade of each part's ramp); props kit (trees, boulders, bushes, crystals, clouds, a crashed old ship) placed in clusters outside the corridor; bird flocks for scale.
+- R10 fixes: stacked pause screens after closing the parent menu (one pause layer max, parent menu owns input while open, regression test); speed selector up to 150%.
+- R11: critters/Guardian were modelled facing -Z (travel direction) so the chase camera saw their backs -> turned 180° toward the player.

@@ -32,3 +32,10 @@ Format: reading taken — reason — how to change.
 - **Guardian:** it drifts 70 m ahead of the ship and holds the rail before the Gate. Each hit lightens its material, and at hp 0 it "falls asleep" (stays visible, glows) and lights the Gate. If the child never fires, it dozes off after 45 s, so the ending is never blocked.
 - **Bug found by the bad-pilot bot:** a ship parked at a wall's front face was treated as "inside the wall" and frozen. The fix applies the thickness rule only strictly inside the wall. Verified with 4 extra seeds × 6 levels.
 - **Sound** "make it smooth": 32 kHz, sine voices, raised-cosine attacks, low-pass, small comb/allpass reverb, all peaks lowered by 4–6 dB, engine bed changed from a hum to soft wind, and runtime anti-stacking (70 ms per sound, max 2 copies).
+
+## Round 8–10 (user feedback: "still crispy, squared digital hum", props, outlines, 150 %, pause bug)
+- **Crispy** came from Godot's default lossy QOA WAV import (fixed earlier: `[importer_defaults] wav compress/mode=0`). The **periodic buzz** came from the feedback-comb reverb; it was replaced with convolution against a smooth noise impulse. Audio now renders at 44.1 kHz = Godot's mix rate.
+- **Outlines** are baked inverted hulls (`meshkit.outline_shell`), not a material `grow` pass: flat-shaded meshes split apart under `grow`. Actor triangle budgets were doubled to include the shells.
+- **Props** are merged per 400 m chunk (few draw calls). Each prop asserts it sits fully outside the corridor and is placed on the sampled terrain height.
+- **Pause:** at most one pause screen; the parent menu owns input while open and returns to the existing pause screen. Covered by `--test`.
+- **Tests pin `--speed=1.0`** so a family member's speed setting doesn't change the bot results.

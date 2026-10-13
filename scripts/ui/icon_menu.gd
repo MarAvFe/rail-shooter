@@ -9,6 +9,7 @@ var sel := 0
 var _cool := 0.0
 var _arm := 0.25  # ignore the press that opened us
 var icon_size := 128.0
+var back_id := ""  ## if set, Esc/Start/Back picks this item (e.g. "resume")
 
 
 func _ready() -> void:
@@ -41,9 +42,15 @@ func _pick(i: int) -> void:
 
 
 func _process(dt: float) -> void:
+	if Game.parent_open():
+		_arm = 0.25  # the parent menu on top owns all input, including the press that closes it
+		return
 	if not is_visible_in_tree() or items.is_empty():
 		return
 	_arm -= dt
+	if back_id != "" and _arm <= 0.0 and (Input.is_action_just_pressed("pause") or Input.is_action_just_pressed("menu_back")):
+		chosen.emit(back_id)
+		return
 	_cool -= dt
 	var dir := 0
 	if Input.is_action_pressed("menu_right"):

@@ -24,7 +24,10 @@ def render(mesh, elev, azim, size=256, bg=(235, 235, 240), silhouette=False):
     ext = np.abs(v[:, :2]).max() * 1.1
     tri = v[mesh.faces]
     cols = mesh.visual.vertex_colors[mesh.faces[:, 0], :3]
+    n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
     for i in np.argsort(tri[:, :, 2].mean(axis=1)):  # far (-z) first; camera looks -z
+        if n[i, 2] <= 0:  # back-face cull (also makes inverted-hull outlines read as rims)
+            continue
         pts = [((p[0] / ext + 1) * size / 2, (1 - p[1] / ext) * size / 2) for p in tri[i]]
         dr.polygon(pts, fill=(20, 20, 30) if silhouette else tuple(int(c) for c in cols[i]))
     return img

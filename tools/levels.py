@@ -2,6 +2,7 @@
 Authoring helpers place orbs/enemies in clusters; nothing per-level lives in game code."""
 import math
 import numpy as np
+import props
 import trimesh
 from shapely.geometry import Polygon
 from shapely.geometry import Point
@@ -286,6 +287,35 @@ def build_level(d) -> dict:
         gs = d["gate"]
         meshes["gate_0"] = bake([Part(ring_mesh(rail, gs, 90, 72), pal["w"], 2)])
         gate_json = {"s": gs}
+    # props: odd-sized clusters outside the corridor, standing on the terrain, merged in ~400 m chunks
+    gss, gus, ghs = terrain_mesh.grid
+    rng = np.random.default_rng(d["seed"] + 700)
+    chunks = {}
+    for kind, n_clusters, sizes, (dmin, dmax), yoff in props.RECIPES.get(n, []):
+        for c in range(n_clusters):
+            cs = rng.uniform(60, rail.length - 60)
+            side = rng.choice([-1, 1])
+            for k in range(int(rng.choice(sizes))):
+                ps = float(np.clip(cs + rng.uniform(-25, 25), 5, rail.length - 5))
+                m, rad = props.KINDS[kind](rng, pal)
+                Wp = float(prof(np.array([ps]))[0][0])
+                u = side * (Wp + rad + rng.uniform(dmin, dmax))
+                assert abs(u) - rad >= Wp, "prop intersects the corridor"
+                i = int(round(ps / 6.0))
+                i = min(i, len(gss) - 1)
+                h = float(np.interp(u, gus[i], ghs[i])) + yoff
+                t, r = rail.frame(np.array([ps]))
+                m.apply_transform(trimesh.transformations.rotation_matrix(rng.uniform(0, 6.28), [0, 1, 0]))
+                m.apply_translation(rail.pos(np.array([ps]))[0] + r[0] * u + np.array([0, h, 0]))
+                chunks.setdefault(int(ps // 400), []).append(m)
+    for k, ms in chunks.items():
+        meshes[f"props_{k}"] = trimesh.util.concatenate(ms)
+    # birds (animated in-game): little flocks near walls and the far landmark, for scale
+    birds = [{"s": w["s"] - 20, "x": float(rng.uniform(-40, 40)), "y": 40.0} for w in d["walls"]]
+    birds += [{"s": float(rng.uniform(200, rail.length - 200)), "x": float(rng.choice([-1, 1]) * rng.uniform(50, 90)), "y": 30.0}
+              for _ in range(3)]
+    if d["mode"] == "hover" or n == 4:
+        birds = birds[:2]
     # landmark beyond the end of the rail, in the fog
     t, _ = rail.frame(np.array([rail.length]))
     lp = rail.pos(np.array([rail.length]))[0] + t[0] * 700 + np.array([0, -60, 0])
@@ -308,7 +338,7 @@ def build_level(d) -> dict:
     lvl = {k: d[k] for k in ("id", "name", "mode", "speed", "ceiling", "orbs", "enemies", "checkpoints",
                              "rest_areas", "music", "fog")}
     cols = np.array([floor_h(ss, o, F, d["seed"], dune) for o in FLOOR_COLS]).T  # (S, 5)
-    lvl.update({"gate": gate_json, "guardian_hold": d.get("guardian_hold"),
+    lvl.update({"birds": birds, "gate": gate_json, "guardian_hold": d.get("guardian_hold"),
                 "length": round(rail.length, 1), "walls": walls_json, "palette": pal, "rocks": rocks_json,
                 "rail": [[round(float(v), 2) for v in (*P[i], W[i], F[i], *(cols[i] if dune else []))] for i in range(len(ss))]})
     write_json(ROOT / f"levels/level_{n}.json", lvl)

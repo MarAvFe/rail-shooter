@@ -105,8 +105,25 @@ class Part:
         self.mesh, self.ramp, self.base, self.glow = mesh, ramp_, base, glow
 
 
-def bake(parts: list[Part], glow_points: list[tuple[np.ndarray, float]] = ()) -> trimesh.Trimesh:
-    """Flat-shade: per-face ramp step from facing vs key light, +1 step near glow sources."""
+def outline_shell(m: trimesh.Trimesh, width: float) -> trimesh.Trimesh:
+    """Inverted hull: welded copy pushed out along smooth normals, winding flipped (renders as a rim)."""
+    w = trimesh.Trimesh(m.vertices.copy(), m.faces.copy(), process=True)  # weld so normals are smooth
+    w.vertices = w.vertices + w.vertex_normals * width
+    w.invert()
+    return w
+
+
+def darkest(ramp_: list[str]) -> str:
+    r, g, b = hex_rgb(ramp_[0])
+    return "#%02x%02x%02x" % tuple(round(c * 255 * 0.7) for c in (r, g, b))
+
+
+def bake(parts: list[Part], glow_points: list[tuple[np.ndarray, float]] = (), outline: float = 0.0) -> trimesh.Trimesh:
+    """Flat-shade: per-face ramp step from facing vs key light, +1 step near glow sources.
+    outline > 0 adds an inverted-hull rim per non-glow part, in the darkest colour of that part's ramp."""
+    if outline > 0:
+        parts = parts + [Part(outline_shell(p.mesh, outline), [darkest(p.ramp)] * 3, 1, glow=True)
+                         for p in parts if not p.glow]
     verts, faces, cols = [], [], []
     off = 0
     for p in parts:

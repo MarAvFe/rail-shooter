@@ -74,7 +74,7 @@ func _build() -> void:
 	_label(t("title"), 22)
 	_first = _slider("music", 0.0, 1.0, 0.05)
 	_slider("sfx", 0.0, 1.0, 0.05)
-	_options("speed", [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.3])
+	_options("speed", [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.3, 1.5])
 	_check("retro")
 	_check("fullscreen")
 	_check("invert_y")
@@ -184,6 +184,9 @@ func _input(ev: InputEvent) -> void:
 
 
 func _process(dt: float) -> void:
+	if _learn_i < 0 and Input.is_action_just_pressed("menu_back"):
+		close()
+		return
 	# live input values (diagnosing odd adapters)
 	var parts: PackedStringArray = []
 	for j: int in Input.get_connected_joypads():
@@ -213,6 +216,8 @@ func _process(dt: float) -> void:
 
 
 func close() -> void:
+	if is_queued_for_deletion():
+		return
 	queue_free()
 	get_tree().paused = false
-	get_tree().call_group("pausable", "request_pause")  # land on the child's pause menu, not straight into play
+	get_tree().call_group("pausable", "parent_menu_closed")  # land on the child's pause menu, not straight into play

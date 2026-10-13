@@ -1,28 +1,34 @@
 {
  "actors": [
   {
-   "name": "enemy_drifter",
-   "tris": 592,
+   "name": "bird",
+   "tris": 44,
    "col": true,
-   "budget": 700
+   "budget": 300
+  },
+  {
+   "name": "enemy_drifter",
+   "tris": 1184,
+   "col": true,
+   "budget": 1400
   },
   {
    "name": "enemy_pod",
-   "tris": 412,
+   "tris": 744,
    "col": true,
-   "budget": 700
+   "budget": 1400
   },
   {
    "name": "enemy_buzzer",
-   "tris": 472,
+   "tris": 944,
    "col": true,
-   "budget": 700
+   "budget": 1400
   },
   {
    "name": "enemy_guardian",
-   "tris": 1720,
+   "tris": 3440,
    "col": true,
-   "budget": 4000
+   "budget": 8000
   },
   {
    "name": "pickup_orb",
@@ -32,37 +38,37 @@
   },
   {
    "name": "ship_air_kite_c0",
-   "tris": 336,
+   "tris": 608,
    "col": true,
    "budget": 1500
   },
   {
    "name": "ship_hover_sled_c0",
-   "tris": 416,
+   "tris": 800,
    "col": true,
    "budget": 1500
   },
   {
    "name": "ship_air_kite_c1",
-   "tris": 336,
+   "tris": 608,
    "col": true,
    "budget": 1500
   },
   {
    "name": "ship_hover_sled_c1",
-   "tris": 416,
+   "tris": 800,
    "col": true,
    "budget": 1500
   },
   {
    "name": "ship_air_kite_c2",
-   "tris": 336,
+   "tris": 608,
    "col": true,
    "budget": 1500
   },
   {
    "name": "ship_hover_sled_c2",
-   "tris": 416,
+   "tris": 800,
    "col": true,
    "budget": 1500
   }
@@ -70,7 +76,7 @@
  "levels": [
   {
    "level": 1,
-   "tris": 13514,
+   "tris": 30138,
    "length": 2344,
    "orbs": 40,
    "enemies": 20,
@@ -78,7 +84,7 @@
   },
   {
    "level": 2,
-   "tris": 10712,
+   "tris": 26312,
    "length": 1792,
    "orbs": 36,
    "enemies": 16,
@@ -86,7 +92,7 @@
   },
   {
    "level": 3,
-   "tris": 14088,
+   "tris": 30808,
    "length": 2364,
    "orbs": 41,
    "enemies": 21,
@@ -94,7 +100,7 @@
   },
   {
    "level": 4,
-   "tris": 11114,
+   "tris": 24890,
    "length": 1786,
    "orbs": 39,
    "enemies": 13,
@@ -102,7 +108,7 @@
   },
   {
    "level": 5,
-   "tris": 14464,
+   "tris": 29344,
    "length": 2380,
    "orbs": 39,
    "enemies": 19,
@@ -110,7 +116,7 @@
   },
   {
    "level": 6,
-   "tris": 14186,
+   "tris": 37810,
    "length": 2371,
    "orbs": 38,
    "enemies": 14,
@@ -119,53 +125,53 @@
  ],
  "audio": {
   "sfx_shot": {
-   "peak": -16.0,
-   "rms": -24.8,
+   "peak": -18.0,
+   "rms": -26.9,
    "seam": 0.0
   },
   "sfx_puff": {
    "peak": -16.0,
-   "rms": -31.8,
+   "rms": -31.0,
    "seam": 0.0
   },
   "sfx_chime_0": {
    "peak": -16.0,
-   "rms": -31.0,
+   "rms": -30.8,
    "seam": 0.0
   },
   "sfx_chime_1": {
    "peak": -16.0,
-   "rms": -30.3,
+   "rms": -28.6,
    "seam": 0.0
   },
   "sfx_chime_2": {
    "peak": -16.0,
-   "rms": -31.0,
+   "rms": -31.9,
    "seam": 0.0
   },
   "sfx_chime_3": {
    "peak": -16.0,
-   "rms": -32.4,
+   "rms": -28.8,
    "seam": 0.0
   },
   "sfx_chime_4": {
    "peak": -16.0,
-   "rms": -30.8,
+   "rms": -32.4,
    "seam": 0.0
   },
   "sfx_chime_5": {
    "peak": -16.0,
-   "rms": -29.7,
+   "rms": -31.6,
    "seam": 0.0
   },
   "sfx_chime_6": {
    "peak": -16.0,
-   "rms": -31.4,
+   "rms": -31.1,
    "seam": 0.0
   },
   "sfx_chime_7": {
    "peak": -16.0,
-   "rms": -30.7,
+   "rms": -30.0,
    "seam": 0.0
   },
   "sfx_boop": {
@@ -180,68 +186,68 @@
   },
   "sfx_honk": {
    "peak": -16.0,
-   "rms": -30.9,
+   "rms": -30.2,
    "seam": 0.0
   },
   "sfx_gap": {
    "peak": -16.0,
-   "rms": -32.4,
+   "rms": -30.9,
    "seam": 0.0
   },
   "sfx_blip": {
    "peak": -20.0,
-   "rms": -30.0,
+   "rms": -29.9,
    "seam": 0.0
   },
   "sfx_jingle": {
    "peak": -14.0,
-   "rms": -25.6,
+   "rms": -25.7,
    "seam": 0.0
   },
   "loop_engine": {
    "peak": -14.0,
-   "rms": -21.3,
-   "seam": 0.008
+   "rms": -21.4,
+   "seam": 0.0035
   },
   "music_title": {
    "peak": -12.0,
-   "rms": -23.5,
-   "seam": 0.0002
+   "rms": -23.3,
+   "seam": 0.0004
   },
   "music_meadow": {
    "peak": -12.0,
-   "rms": -24.1,
+   "rms": -23.1,
    "seam": 0.0001
   },
   "music_dunes": {
    "peak": -12.0,
-   "rms": -22.5,
-   "seam": 0.0021
+   "rms": -23.9,
+   "seam": 0.0019
   },
   "music_ridge": {
    "peak": -12.0,
-   "rms": -23.7,
-   "seam": 0.0004
+   "rms": -22.4,
+   "seam": 0.0007
   },
   "music_crystal": {
    "peak": -12.0,
-   "rms": -22.5,
-   "seam": 0.0004
+   "rms": -22.0,
+   "seam": 0.0002
   },
   "music_mist": {
    "peak": -12.0,
-   "rms": -22.6,
-   "seam": 0.0003
+   "rms": -22.9,
+   "seam": 0.0013
   },
   "music_gate": {
    "peak": -12.0,
-   "rms": -23.2,
-   "seam": 0.0022
+   "rms": -23.0,
+   "seam": 0.0017
   },
   "music_ending": {
    "peak": -12.0,
-   "rms": -22.8,
-   "seam": 0.0033
+   "rms": -23.0,
+   "seam": 0.0017
   }
  },
  "icons": [

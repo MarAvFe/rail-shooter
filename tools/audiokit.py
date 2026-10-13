@@ -1,12 +1,12 @@
 """Procedural, original audio: soft effects + calm pentatonic loops. Fixed seeds -> identical rebuilds.
-Smooth by construction: sine voices, soft attacks (>= 8 ms), one-pole low-pass, light comb/allpass room reverb.
-WAV 16-bit mono 32 kHz. Music loops are an integer number of bars; reverb + release tails wrap onto the head."""
+Smooth by construction: sine voices, soft attacks (>= 8 ms), one-pole low-pass, convolution reverb with a
+decaying filtered-noise impulse (no comb filters -> no metallic/periodic buzz). WAV 16-bit mono 44.1 kHz. Music loops are an integer number of bars; reverb + release tails wrap onto the head."""
 import wave
 import numpy as np
-from scipy.signal import lfilter
+from scipy.signal import lfilter, fftconvolve
 from meshkit import ROOT
 
-SR = 32000
+SR = 44100  # = Godot's mix rate: no resampling at play time
 OUT = ROOT / "assets/audio"
 
 
@@ -35,20 +35,23 @@ def lowpass(x, hz):
     return lfilter([1 - a], [1, -a], x)
 
 
+_IR = None
+
+
 def reverb(x, mix=0.2, tail=1.2):
-    """Small soft room: 4 parallel combs + 2 allpasses, darkened. Returns x with tail appended."""
+    """Soft room via convolution with a smooth, darkened, exponentially decaying noise burst.
+    No feedback delays, so tails have no periodic 'hum'. Returns x with tail appended."""
+    global _IR
+    if _IR is None:
+        n = int(1.4 * SR)
+        t = np.arange(n) / SR
+        ir = np.random.default_rng(1234).normal(size=n) * np.exp(-t / 0.32)
+        ir = lowpass(lowpass(ir, 2500), 2500)
+        ir[: int(0.012 * SR)] = 0  # 12 ms pre-delay
+        _IR = ir / np.sqrt((ir ** 2).sum())
     x = np.concatenate([x, np.zeros(int(tail * SR))])
-    wet = np.zeros_like(x)
-    for ms, g in ((29.7, 0.78), (37.1, 0.76), (41.1, 0.74), (43.7, 0.72)):
-        D = int(ms * SR / 1000)
-        a = np.zeros(D + 1); a[0] = 1; a[D] = -g
-        wet += lfilter([1], a, x)
-    for ms, g in ((5.0, 0.6), (1.7, 0.6)):
-        D = int(ms * SR / 1000)
-        b = np.zeros(D + 1); b[0] = -g; b[D] = 1
-        a = np.zeros(D + 1); a[0] = 1; a[D] = -g
-        wet = lfilter(b, a, wet)
-    wet = lowpass(wet, 3500) / 4
+    wet = fftconvolve(x, _IR)[: len(x)]
+    wet *= np.abs(x).max() / (np.abs(wet).max() + 1e-9)
     return x * (1 - mix) + wet * mix
 
 
@@ -82,7 +85,7 @@ PENTA = [0, 2, 4, 7, 9]
 def sfx():
     out = {}
 
-    def fx(name, x, peak, rv=0.0, lp=4000):
+    def fx(name, x, peak, rv=0.0, lp=3000):
         x = lowpass(x, lp)
         if rv:
             x = reverb(x, rv, 0.6)
@@ -91,32 +94,31 @@ def sfx():
     # zap: fast downward sweep with a little wobble, soft edges
     n = int(0.15 * SR)
     t = np.arange(n) / SR
-    f = 260 + 1300 * np.exp(-t * 28) + 40 * np.sin(2 * np.pi * 55 * t)
-    fx("sfx_shot", tone(f, 0.15, a=0.004, d=0.04, s=0.5, r=0.08), -16, lp=3200)
+    f = 220 + 800 * np.exp(-t * 24) + 25 * np.sin(2 * np.pi * 40 * t)
+    fx("sfx_shot", tone(f, 0.15, a=0.008, d=0.04, s=0.5, r=0.08), -18, lp=2200)
     m = int(0.45 * SR)
     puff = 0.6 * soft_noise(0.45, 700, 1) * env(m, 0.02, 0.12, 0.35, 0.3) + tone(np.linspace(330, 190, m), 0.45, a=0.02, r=0.35)
     fx("sfx_puff", puff, -16, rv=0.2, lp=1800)
     for i in range(8):  # rising pentatonic chimes
-        mi = 72 + PENTA[i % 5] + 12 * (i // 5)
+        mi = 67 + PENTA[i % 5] + 12 * (i // 5)
         x = tone(note(mi), 0.7, a=0.008, d=0.2, s=0.25, r=0.5) + 0.15 * tone(note(mi + 12), 0.7, a=0.008, d=0.1, s=0.1, r=0.4)
-        fx(f"sfx_chime_{i}", x, -16, rv=0.25, lp=5000)
+        fx(f"sfx_chime_{i}", x, -16, rv=0.25, lp=3000)
     fx("sfx_boop", tone(np.linspace(260, 200, int(0.24 * SR)), 0.24, a=0.02, d=0.08, s=0.5, r=0.12), -18, lp=1500)
     fx("sfx_hit", tone(np.linspace(720, 640, int(0.07 * SR)), 0.07, a=0.006, d=0.03, s=0.3, r=0.04), -24, lp=2500)
-    honk = tone(note(64), 0.38, "tri", a=0.03, d=0.1, s=0.7, r=0.15) + 0.6 * tone(note(67), 0.38, "tri", a=0.03, d=0.1, s=0.7, r=0.15)
+    honk = sum(g * tone(note(m) * h, 0.38, a=0.03, d=0.1, s=0.7, r=0.15) for m in (64, 67) for h, g in ((1, 1), (2, 0.25), (3, 0.08)))
     fx("sfx_honk", honk, -16, rv=0.12, lp=1400)
-    sp = sum(np.pad(tone(note(84 + p), 0.5, a=0.01, d=0.1, s=0.2, r=0.35), (int(k * 0.07 * SR), int(0.3 * SR) - int(k * 0.07 * SR)))
+    sp = sum(np.pad(tone(note(76 + p), 0.5, a=0.01, d=0.1, s=0.2, r=0.35), (int(k * 0.07 * SR), int(0.3 * SR) - int(k * 0.07 * SR)))
              * 0.75 ** k for k, p in enumerate([0, 4, 7, 12]))
-    fx("sfx_gap", sp, -16, rv=0.3, lp=5000)
-    fx("sfx_blip", tone(note(76), 0.09, a=0.008, d=0.03, s=0.3, r=0.05), -20, lp=3000)
+    fx("sfx_gap", sp, -16, rv=0.3, lp=3000)
+    fx("sfx_blip", tone(note(69), 0.09, a=0.008, d=0.03, s=0.3, r=0.05), -20, lp=3000)
     jing = np.concatenate([tone(note(72 + p), 0.24, a=0.015, d=0.08, s=0.5, r=0.12) for p in [0, 4, 7, 9]]
                           + [tone(note(84), 0.9, a=0.015, d=0.2, s=0.4, r=0.6)])
-    fx("sfx_jingle", jing, -14, rv=0.3, lp=4500)
+    fx("sfx_jingle", jing, -14, rv=0.3, lp=3000)
     # engine: warm hum (110 Hz family, audible on small speakers) + a breath of filtered air.
     # 4 s loop; every partial completes whole cycles in 4 s, and the noise is crossfaded -> seamless.
     L = 4 * SR
     t = np.arange(L) / SR
-    hum = (np.sin(2 * np.pi * 110 * t) + 0.5 * np.sin(2 * np.pi * 220.25 * t) + 0.25 * np.sin(2 * np.pi * 330 * t)
-           + 0.12 * np.sin(2 * np.pi * 440.5 * t)) * (0.85 + 0.15 * np.sin(2 * np.pi * 0.5 * t))
+    hum = (np.sin(2 * np.pi * 110 * t) + 0.3 * np.sin(2 * np.pi * 220.25 * t)) * (0.85 + 0.15 * np.sin(2 * np.pi * 0.5 * t))
     X = SR // 2
     w = soft_noise(4.5, 600, 9)
     air = w[:L].copy()

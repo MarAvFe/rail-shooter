@@ -93,6 +93,7 @@ def terrain_mesh(rail: Rail, prof, pal, seed: int, dune=0.0, side=(70, 95)) -> l
         us.append(u)
         hs.append(h)
     us, hs = np.array(us).T, np.array(hs).T  # (S, C)
+    terrain_mesh.grid = (ss, us, hs)  # for prop placement: height at any (s, u)
     V = P[:, None, :] + R[:, None, :] * us[..., None] + UP * hs[..., None]
     chunks = []
     nC = V.shape[1]
